@@ -1,0 +1,101 @@
+task_id,task_name,category,agent_mode,success,steps_taken,tool_calls,failed_tool_calls,recovery_attempts,latency_sec,verification_msg
+TASK_01,Bug Fix & Unit Test Verification,Code Repair,single_turn,False,1,1,0,0,0.0,"Unit tests failed:
+============================= test session starts =============================
+collecting ... collected 3 items
+
+tests/test_math_utils.py::test_factorial_base FAILED                     [ 33%]
+tests/test_math_utils.py::test_factorial_values FAILED                   [ 66%]
+tests/test_math_utils.py::test_factorial_negative PASSED                 [100%]
+
+================================== FAILURES ===================================
+_____________________________ test_factorial_base _____________________________
+
+    def test_factorial_base():
+>       assert factorial(0) == 1
+E       assert 0 == 1
+E        +  where 0 = factorial(0)
+
+tests\test_math_utils.py:5: AssertionError
+____________________________ test_factorial_values ____________________________
+
+    def test_factorial_values():
+>       assert factorial(3) == 6
+E       assert 2 == 6
+E        +  where 2 = factorial(3)
+
+tests\test_math_utils.py:9: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_math_utils.py::test_factorial_base - assert 0 == 1
+FAILED tests/test_math_utils.py::test_factorial_values - assert 2 == 6
+========================= 2 failed, 1 passed in 0.09s ========================="
+TASK_01,Bug Fix & Unit Test Verification,Code Repair,react,True,5,5,1,1,0.857,All unit tests in test_math_utils.py passed successfully.
+TASK_01,Bug Fix & Unit Test Verification,Code Repair,verified,True,5,5,1,1,1.176,All unit tests in test_math_utils.py passed successfully.
+TASK_02,Repository Search & Config Aggregation,Repo Exploration,single_turn,False,1,1,0,0,0.0,summary.json was not created in the workspace root.
+TASK_02,Repository Search & Config Aggregation,Repo Exploration,react,True,4,4,0,0,0.003,Active ports correctly identified and aggregated in summary.json.
+TASK_02,Repository Search & Config Aggregation,Repo Exploration,verified,True,4,4,0,0,0.003,Active ports correctly identified and aggregated in summary.json.
+TASK_03,Data Pipeline & Financial Metric,Data Analytics,single_turn,False,1,1,0,0,0.0,net_revenue.txt was not created.
+TASK_03,Data Pipeline & Financial Metric,Data Analytics,react,True,3,3,0,0,0.001,Net revenue correctly calculated as 891.0 in net_revenue.txt.
+TASK_03,Data Pipeline & Financial Metric,Data Analytics,verified,True,3,3,0,0,0.002,Net revenue correctly calculated as 891.0 in net_revenue.txt.
+TASK_04,Algorithm Implementation & Edge Cases,Software Development,single_turn,False,1,1,0,0,0.001,"Verification failed:
+[Exit Code 1]
+STDERR:
+Traceback (most recent call last):
+  File ""C:\Users\CSE-TECH-04\AppData\Local\Temp\agent_bench_TASK_04_zjr_6wwj\.sandbox_exec.py"", line 2, in <module>
+    from search import binary_search
+ModuleNotFoundError: No module named 'search'
+"
+TASK_04,Algorithm Implementation & Edge Cases,Software Development,react,True,2,2,0,0,0.053,binary_search implementation passes all verification test cases.
+TASK_04,Algorithm Implementation & Edge Cases,Software Development,verified,True,2,2,0,0,0.109,binary_search implementation passes all verification test cases.
+TASK_05,Legacy Code Refactor & Regression Defense,Refactoring,single_turn,False,1,1,0,0,0.0,"Regression tests failed:
+============================= test session starts =============================
+collecting ... collected 3 items
+
+tests/test_user_service.py::test_complete_user PASSED                    [ 33%]
+tests/test_user_service.py::test_missing_age FAILED                      [ 66%]
+tests/test_user_service.py::test_missing_email FAILED                    [100%]
+
+================================== FAILURES ===================================
+______________________________ test_missing_age _______________________________
+
+    def test_missing_age():
+        user = {""first_name"": ""Bob"", ""last_name"": ""Jones"", ""email"": ""bob@example.com""}
+>       assert format_user_profile(user) == ""Bob Jones (Age: Unknown) - bob@example.com""
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_user_service.py:9: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+user_data = {'first_name': 'Bob', 'last_name': 'Jones', 'email': 'bob@example.com'}
+
+    def format_user_profile(user_data: dict) -> str:
+        # BUG: Fails when age is missing or email is empty
+>       return f""{user_data['first_name']} {user_data['last_name']} (Age: {user_data['age']}) - {user_data['email']}""
+                                                                           ^^^^^^^^^^^^^^^^
+E       KeyError: 'age'
+
+src\user_service.py:3: KeyError
+_____________________________ test_missing_email ______________________________
+
+    def test_missing_email():
+        user = {""first_name"": ""Carol"", ""last_name"": ""White"", ""age"": 25}
+>       assert format_user_profile(user) == ""Carol White (Age: 25) - No email""
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_user_service.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+user_data = {'first_name': 'Carol', 'last_name': 'White', 'age': 25}
+
+    def format_user_profile(user_data: dict) -> str:
+        # BUG: Fails when age is missing or email is empty
+>       return f""{user_data['first_name']} {user_data['last_name']} (Age: {user_data['age']}) - {user_data['email']}""
+                                                                                                 ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'email'
+
+src\user_service.py:3: KeyError
+=========================== short test summary info ===========================
+FAILED tests/test_user_service.py::test_missing_age - KeyError: 'age'
+FAILED tests/test_user_service.py::test_missing_email - KeyError: 'email'
+========================= 2 failed, 1 passed in 0.08s ========================="
+TASK_05,Legacy Code Refactor & Regression Defense,Refactoring,react,True,4,4,1,1,0.815,Refactored user_service.py passes all regression tests.
+TASK_05,Legacy Code Refactor & Regression Defense,Refactoring,verified,True,4,4,1,1,1.221,Refactored user_service.py passes all regression tests.

@@ -1,0 +1,21 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Large Checkpoints & Heavy Model Binaries
+results/checkpoints/
+*.pt
+*.bin
+*.safetensors
+
+# Temporary execution artifacts
+.sandbox_exec.py
+scratch/
+tmp/

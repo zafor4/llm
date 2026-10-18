@@ -1,0 +1,134 @@
+[
+  {
+    "model_name": "GPT-Micro-128",
+    "n_layer": 4,
+    "n_head": 4,
+    "n_embd": 192,
+    "block_size": 128,
+    "total_params": 1900416,
+    "non_emb_params": 1779840,
+    "train_time_sec": 3.99,
+    "tokens_per_sec": 153702.5,
+    "val_loss": 0.6356,
+    "val_perplexity": 1.89,
+    "test_loss": 0.6079,
+    "test_perplexity": 1.84,
+    "syntax_validity_rate": 0.0,
+    "sample_completions": [
+      {
+        "prompt": "def fibonacci(n: int) -> int:\n    if n <= 1:\n        return n\n",
+        "continuation": "def lci(amic programming.\n    Time Complexity: O(n * W), Space Complexity: O(n), Space Complexity: O(1).\n    \"\"\"\n    if n = len(1).",
+        "is_syntax_valid": false
+      },
+      {
+        "prompt": "def quick_sort(arr: list[int]) -> list[int]:\n",
+        "continuation": "def lon list[int]:\n    \"\"\"Find a list[int]:\n    \"\"\"Sort an arralindrome igrammingsack programming.\n    Time Complexity: O(n log n =",
+        "is_syntax_valid": false
+      },
+      {
+        "prompt": "def binary_search(arr: list[int], target: int) -> int:\n",
+        "continuation": "def binary Knundrome ignalind.\n    \"\"\"Compute the 0:\n        return 0\n    def size(log number using binary Knamic programming.\n   ",
+        "is_syntax_valid": false
+      }
+    ]
+  },
+  {
+    "model_name": "GPT-Mini-256",
+    "n_layer": 6,
+    "n_head": 6,
+    "n_embd": 288,
+    "block_size": 256,
+    "total_params": 6212736,
+    "non_emb_params": 5995008,
+    "train_time_sec": 11.75,
+    "tokens_per_sec": 102612.0,
+    "val_loss": 0.1434,
+    "val_perplexity": 1.15,
+    "test_loss": 0.135,
+    "test_perplexity": 1.14,
+    "syntax_validity_rate": 0.0,
+    "sample_completions": [
+      {
+        "prompt": "def fibonacci(n: int) -> int:\n    if n <= 1:\n        return n\n",
+        "continuation": "def longest_ci(text1: int) -> int:\n    \"\"\"Compute the n-th Fibonacci number using dynamic programming.\n    Time Complexity",
+        "is_syntax_valid": false
+      },
+      {
+        "prompt": "def quick_sort(arr: list[int]) -> list[int]:\n",
+        "continuation": "def divide-alind-conquer quicksort algorithm.\n    Time Complexity: O(n log n) average, O(n^2) worst case.\n    \"\"\"\n    if",
+        "is_syntax_valid": false
+      },
+      {
+        "prompt": "def binary_search(arr: list[int], target: int) -> int:\n",
+        "continuation": "def found.\n    \"\"\"Checulalind.\n    Time Complexity: O(n log n), Space Complexity: O(1).\n    \"\"\"\n    low, high = 0, len(arr) // 2",
+        "is_syntax_valid": false
+      }
+    ]
+  },
+  {
+    "model_name": "GPT-Small-256",
+    "n_layer": 8,
+    "n_head": 8,
+    "n_embd": 384,
+    "block_size": 256,
+    "total_params": 14486784,
+    "non_emb_params": 14196480,
+    "train_time_sec": 21.23,
+    "tokens_per_sec": 56790.9,
+    "val_loss": 0.0968,
+    "val_perplexity": 1.1,
+    "test_loss": 0.0934,
+    "test_perplexity": 1.1,
+    "syntax_validity_rate": 0.0,
+    "sample_completions": [
+      {
+        "prompt": "def fibonacci(n: int) -> int:\n    if n <= 1:\n        return n\n",
+        "continuation": "def bfs_shortest_path(graph: dict[str, list[str]], start: str, goal: str) -> list[str]:\n    \"\"\"Find shortest path in an unweighted graph using B",
+        "is_syntax_valid": false
+      },
+      {
+        "prompt": "def quick_sort(arr: list[int]) -> list[int]:\n",
+        "continuation": "class Queue:\n    \"\"\"Sort a list using merge sort algorithm.\n    Time Complexity: O(n log n), Space Complexity: O(n).\n    \"\"\"\n    if len(arr) <= 1:\n        return arr\n    mid =",
+        "is_syntax_valid": false
+      },
+      {
+        "prompt": "def binary_search(arr: list[int], target: int) -> int:\n",
+        "continuation": "\n    \"\"\"Find index of target in a sorted list using binary search.\n    Returns -1 if target is not found.\n    Time Complexity: O(log n), Space Complexity: O",
+        "is_syntax_valid": false
+      }
+    ]
+  },
+  {
+    "model_name": "GPT-Mini-512",
+    "n_layer": 6,
+    "n_head": 6,
+    "n_embd": 288,
+    "block_size": 512,
+    "total_params": 6286464,
+    "non_emb_params": 5995008,
+    "train_time_sec": 23.34,
+    "tokens_per_sec": 103303.6,
+    "val_loss": 0.1384,
+    "val_perplexity": 1.15,
+    "test_loss": 0.128,
+    "test_perplexity": 1.14,
+    "syntax_validity_rate": 0.0,
+    "sample_completions": [
+      {
+        "prompt": "def fibonacci(n: int) -> int:\n    if n <= 1:\n        return n\n",
+        "continuation": "def quick_sort(arr: int) -> int:\n    \"\"\"Compute Greatest Common Divisor using Euclidean algorithm.\n    Time Complexity: O(log(log(min(a",
+        "is_syntax_valid": false
+      },
+      {
+        "prompt": "def quick_sort(arr: list[int]) -> list[int]:\n",
+        "continuation": "def merge sort algorithm.\n    Time Complexity: O(n log n), Space Complexity: O(n).\n    \"\"\"\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr) // 2\n    left",
+        "is_syntax_valid": false
+      },
+      {
+        "prompt": "def binary_search(arr: list[int], target: int) -> int:\n",
+        "continuation": "def fibonacci numbonacci n:\n    \"\"\"Find a giveturns: O(namic programming.\n    Time Complexity: O(n), Space Complexity",
+        "is_syntax_valid": false
+      }
+    ]
+  }
+]

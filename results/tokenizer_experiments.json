@@ -1,0 +1,20 @@
+{
+  "Character": {
+    "vocab_size": 84,
+    "tokens_count": 23428,
+    "compression_ratio_bytes_per_tok": 1.0,
+    "embedding_params": 24192
+  },
+  "BPE-500": {
+    "vocab_size": 500,
+    "tokens_count": 7472,
+    "compression_ratio_bytes_per_tok": 3.135,
+    "embedding_params": 144000
+  },
+  "BPE-2048": {
+    "vocab_size": 813,
+    "tokens_count": 6690,
+    "compression_ratio_bytes_per_tok": 3.502,
+    "embedding_params": 234144
+  }
+}
