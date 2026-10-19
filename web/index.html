@@ -3,337 +3,355 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmallGPT & Autonomous Agent Research Dashboard</title>
-  <meta name="description" content="Interactive research interface for small-scale causal language models and autonomous agentic software engineering.">
+  <title>Antigravity AI Studio — Autonomous Agent & SmallGPT Platform</title>
+  <meta name="description" content="Conversational Chat, Autonomous Coding Agent, Live Model Training Studio, and Research Dashboard.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header -->
-    <header class="app-header">
-      <div class="header-left">
-        <div class="logo-mark">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- Top Navigation Bar -->
+  <header class="studio-header">
+    <div class="header-brand">
+      <div class="brand-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">Antigravity AI Studio</span>
+        <span class="brand-version">v2.0 • SmallGPT & Agentic Platform</span>
+      </div>
+    </div>
+
+    <!-- Active Model Selector Pill -->
+    <div class="header-center">
+      <div class="model-selector-pill" id="model-pill">
+        <span class="pill-dot"></span>
+        <span class="pill-label">Model:</span>
+        <select id="header-model-select" class="header-select">
+          <option value="GPT-Mini-256" selected>GPT-Mini-256 (6.2M Checkpoint)</option>
+          <option value="GPT-Small-256">GPT-Small-256 (14.5M Checkpoint)</option>
+          <option value="GPT-Micro-128">GPT-Micro-128 (1.9M Checkpoint)</option>
+        </select>
+      </div>
+
+      <!-- Mode Switcher (Agent vs Chat) -->
+      <div class="mode-toggle-group">
+        <button class="mode-btn active" id="mode-agent-btn" data-mode="agent">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+          Autonomous Agent
+        </button>
+        <button class="mode-btn" id="mode-chat-btn" data-mode="chat">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Chatbot
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Controls: GPU Pill & Drawer Trigger -->
+    <div class="header-actions">
+      <div class="gpu-pill" id="gpu-pill">
+        <span class="pulse-indicator"></span>
+        <span id="gpu-status-text">PyTorch 2.6 • CUDA Ready</span>
+      </div>
+      <button class="btn-drawer-toggle" id="btn-open-drawer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Control & Training Hub
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Chat & Agent Conversation Workspace -->
+  <main class="chat-workspace">
+    <div class="chat-scroll-container" id="chat-messages-container">
+      <!-- Welcome Hero (shown when no messages yet) -->
+      <div class="chat-welcome-hero" id="chat-welcome-hero">
+        <div class="welcome-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
           </svg>
         </div>
-        <div>
-          <h1 class="app-title">SmallGPT & Agentic AI Research</h1>
-          <p class="app-subtitle">Causal Language Modeling & Autonomous Tool Control Loop</p>
+        <h2 class="welcome-title">How can Antigravity help you today?</h2>
+        <p class="welcome-subtitle">
+          Toggle between <strong>Autonomous Agent</strong> (tool-use, code execution, automated testing) or <strong>Chatbot Mode</strong> (natural language generation with SmallGPT).
+        </p>
+
+        <!-- Quick Starter Tasks -->
+        <div class="starter-cards-grid">
+          <div class="starter-card" data-task="TASK_01">
+            <div class="starter-badge">Software Repair</div>
+            <div class="starter-text">Fix off-by-one bug in factorial and verify with pytest</div>
+          </div>
+          <div class="starter-card" data-task="TASK_02">
+            <div class="starter-badge">Repo Exploration</div>
+            <div class="starter-text">Search microservice configs & aggregate active ports</div>
+          </div>
+          <div class="starter-card" data-task="TASK_03">
+            <div class="starter-badge">Data Analytics</div>
+            <div class="starter-text">Process transaction CSV data & calculate net revenues</div>
+          </div>
+          <div class="starter-card" data-task="TASK_04">
+            <div class="starter-badge">Algorithm Design</div>
+            <div class="starter-text">Synthesize binary search algorithm & test edge cases</div>
+          </div>
         </div>
       </div>
-      <div class="header-status" id="system-status-badge">
-        <div class="pulse-indicator"></div>
-        <span id="gpu-info-text">Connecting to PyTorch engine...</span>
-      </div>
-    </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="nav-tabs" role="tablist">
-      <button class="tab-btn active" id="tab-agent-btn" data-tab="tab-agent">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
-        Autonomous Agent Studio
+      <!-- Messages will be injected here dynamically -->
+    </div>
+
+    <!-- Bottom Chat Input Bar -->
+    <div class="chat-input-wrapper">
+      <div class="chat-input-box">
+        <!-- Benchmark Quick Selector -->
+        <div class="input-task-picker">
+          <label for="benchmark-quick-select">Task Preset:</label>
+          <select id="benchmark-quick-select">
+            <option value="">Custom Goal / Free Prompt</option>
+            <option value="TASK_01">Task 1: Bug Fix in Math Utils (pytest)</option>
+            <option value="TASK_02">Task 2: Service Config Discovery</option>
+            <option value="TASK_03">Task 3: Transaction CSV Net Revenue</option>
+            <option value="TASK_04">Task 4: Binary Search Synthesis</option>
+            <option value="TASK_05">Task 5: Refactoring & Regression Defense</option>
+          </select>
+        </div>
+
+        <div class="input-text-row">
+          <textarea id="chat-input" placeholder="Give the Autonomous Agent a goal or type a prompt for SmallGPT..." rows="1"></textarea>
+          <div class="input-actions">
+            <button class="btn-clear-chat" id="btn-clear-chat" title="Clear conversation">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+            <button class="btn-send-message" id="btn-send">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="input-footer-caption">
+        <span id="active-mode-caption">Agent Mode Active</span>: Executes real actions in sandboxed workspace with runtime test verification.
+      </div>
+    </div>
+  </main>
+
+  <!-- Slide-Over Control & Training Hub Drawer -->
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <aside class="control-drawer" id="control-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <h2>Control & Training Hub</h2>
+        <p>Model training studio, checkpoint switcher, and system monitoring</p>
+      </div>
+      <button class="btn-close-drawer" id="btn-close-drawer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <button class="tab-btn" id="tab-gpt-btn" data-tab="tab-gpt">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
-        SmallGPT Playground
+    </div>
+
+    <!-- Drawer Navigation Tabs -->
+    <nav class="drawer-nav">
+      <button class="drawer-tab-btn active" data-dtab="dtab-training">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Model Trainer Studio
       </button>
-      <button class="tab-btn" id="tab-research-btn" data-tab="tab-research">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-        Scaling Laws & Metrics
+      <button class="drawer-tab-btn" data-dtab="dtab-models">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        Model Manager
       </button>
-      <button class="tab-btn" id="tab-tests-btn" data-tab="tab-tests">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
-        Unit Tests & Sandbox
+      <button class="drawer-tab-btn" data-dtab="dtab-behavior">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Agent Persona & Tools
+      </button>
+      <button class="drawer-tab-btn" data-dtab="dtab-monitor">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Live Monitoring & Tests
       </button>
     </nav>
 
-    <!-- TAB 1: Autonomous Agent Studio -->
-    <main class="tab-content active" id="tab-agent">
-      <div class="two-column-layout">
-        <!-- Left: Configuration & Goals -->
-        <section class="card config-panel">
-          <div class="card-header">
-            <span class="badge badge-purple">Configuration</span>
-            <h2>Task Setup & Control Loop</h2>
-          </div>
+    <div class="drawer-content-body">
+      <!-- DTAB 1: Model Trainer Studio -->
+      <section class="drawer-pane active" id="dtab-training">
+        <div class="pane-section">
+          <h3>Train a Custom SmallGPT Model</h3>
+          <p class="pane-help">Configure architecture parameters, choose corpus, and train on your GPU with live loss telemetry.</p>
+        </div>
 
-          <div class="form-group">
-            <label for="task-select">Select Benchmark Task:</label>
-            <select id="task-select" class="form-control">
-              <option value="TASK_01">TASK 1: Bug Fix & Test Verification (Factorial)</option>
-              <option value="TASK_02">TASK 2: Repo Exploration & Port Aggregation</option>
-              <option value="TASK_03">TASK 3: Multi-Step Financial CSV Pipeline</option>
-              <option value="TASK_04">TASK 4: Binary Search Algorithm Synthesis</option>
-              <option value="TASK_05">TASK 5: Legacy Refactoring & Regression Defense</option>
-            </select>
+        <div class="form-row">
+          <div class="form-col">
+            <label>Model Checkpoint Name:</label>
+            <input type="text" id="train-model-name" class="d-input" value="Custom-GPT-Micro">
           </div>
-
-          <div class="task-description-box" id="task-goal-box">
-            Loading goal description...
+          <div class="form-col">
+            <label>Max Training Steps:</label>
+            <input type="number" id="train-steps" class="d-input" value="100" min="25" max="1000">
           </div>
+        </div>
 
-          <div class="form-group">
-            <label for="agent-mode-select">Agent Execution Architecture:</label>
-            <select id="agent-mode-select" class="form-control">
-              <option value="verified" selected>Mode C: Verified Agent (Observe-Act-Reflect-Verify)</option>
-              <option value="react">Mode B: ReAct Agent (Iterative Observe-Act)</option>
-              <option value="single_turn">Mode A: Single-Response LLM (Zero-shot, No Tools)</option>
-            </select>
+        <div class="form-row">
+          <div class="form-col">
+            <label>Layers (n_layer):</label>
+            <input type="number" id="train-layers" class="d-input" value="4" min="2" max="12">
           </div>
-
-          <div class="button-group">
-            <button class="btn btn-primary" id="btn-run-agent">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              Execute Autonomous Agent
-            </button>
+          <div class="form-col">
+            <label>Attention Heads:</label>
+            <input type="number" id="train-heads" class="d-input" value="4" min="2" max="12">
           </div>
+        </div>
 
-          <!-- Sandbox Features Banner -->
-          <div class="sandbox-features-box">
-            <h4>Active Sandbox Boundaries:</h4>
-            <ul>
-              <li>Strict workspace path containment (anti-traversal)</li>
-              <li>Untrusted observation tagging (anti-injection)</li>
-              <li>Isolated subprocess code execution (10s timeout)</li>
-            </ul>
+        <div class="form-row">
+          <div class="form-col">
+            <label>Embedding Dim:</label>
+            <input type="number" id="train-dim" class="d-input" value="192" step="32" min="64" max="512">
           </div>
-        </section>
-
-        <!-- Right: Execution Telemetry & Step Trace -->
-        <section class="card results-panel">
-          <div class="card-header">
-            <span class="badge badge-blue">Live Telemetry</span>
-            <h2>Agent Execution & Evidence Trace</h2>
+          <div class="form-col">
+            <label>Context Window (block_size):</label>
+            <input type="number" id="train-block-size" class="d-input" value="128" step="64" min="64" max="512">
           </div>
+        </div>
 
-          <!-- Telemetry Stats Grid -->
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <span class="metric-label">Status</span>
-              <span class="metric-val" id="stat-status">READY</span>
+        <div class="form-row">
+          <div class="form-col">
+            <label>Learning Rate:</label>
+            <input type="text" id="train-lr" class="d-input" value="0.0005">
+          </div>
+          <div class="form-col">
+            <label>Batch Size:</label>
+            <input type="number" id="train-batch-size" class="d-input" value="16" min="4" max="64">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Training Corpus (Leave empty for curated Python algorithm dataset):</label>
+          <textarea id="train-corpus-text" class="d-textarea code-font" rows="3" placeholder="Paste custom training text, function snippets, or domain corpus..."></textarea>
+        </div>
+
+        <button class="btn btn-primary" id="btn-start-training">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start GPU Training Run
+        </button>
+
+        <!-- Live Training Progress Monitor -->
+        <div class="training-monitor-box" id="training-monitor-box" style="display: none;">
+          <div class="monitor-header">
+            <span class="monitor-title" id="train-status-badge">TRAINING IN PROGRESS</span>
+            <span class="monitor-step" id="train-step-indicator">Step 0 / 100</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="train-progress-fill" style="width: 0%;"></div>
+          </div>
+          <div class="monitor-stats-grid">
+            <div class="m-stat">
+              <span class="m-stat-label">Loss</span>
+              <span class="m-stat-val" id="train-stat-loss">0.0000</span>
             </div>
-            <div class="metric-card">
-              <span class="metric-label">Steps</span>
-              <span class="metric-val" id="stat-steps">0</span>
+            <div class="m-stat">
+              <span class="m-stat-label">Val Perplexity</span>
+              <span class="m-stat-val" id="train-stat-ppl">0.00</span>
             </div>
-            <div class="metric-card">
-              <span class="metric-label">Tool Calls</span>
-              <span class="metric-val" id="stat-tools">0</span>
+            <div class="m-stat">
+              <span class="m-stat-label">Speed</span>
+              <span class="m-stat-val" id="train-stat-speed">0 tok/s</span>
             </div>
-            <div class="metric-card">
-              <span class="metric-label">Error Recoveries</span>
-              <span class="metric-val" id="stat-recoveries">0</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-label">Latency</span>
-              <span class="metric-val" id="stat-latency">0.00s</span>
+            <div class="m-stat">
+              <span class="m-stat-label">Peak VRAM</span>
+              <span class="m-stat-val" id="train-stat-vram">0 MB</span>
             </div>
           </div>
+        </div>
+      </section>
 
-          <!-- Dynamic Steps Container -->
-          <div class="steps-timeline" id="steps-timeline-container">
-            <div class="empty-state">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              <p>Click "Execute Autonomous Agent" to watch the control loop inspect, plan, act, and verify in real time.</p>
-            </div>
+      <!-- DTAB 2: Model Manager -->
+      <section class="drawer-pane" id="dtab-models">
+        <div class="pane-section">
+          <h3>Local Checkpoints & Model Switcher</h3>
+          <p class="pane-help">Switch active inference model on the fly across saved SmallGPT weights or external local endpoints.</p>
+        </div>
+
+        <div class="model-cards-list" id="model-cards-container">
+          <!-- Loaded dynamically -->
+          <div class="d-loading">Scanning checkpoints directory...</div>
+        </div>
+      </section>
+
+      <!-- DTAB 3: Agent Persona & Tools -->
+      <section class="drawer-pane" id="dtab-behavior">
+        <div class="pane-section">
+          <h3>Agent Persona & Sandbox Directives</h3>
+          <p class="pane-help">Customize the system instructions, tools, and safety bounds governing the agent.</p>
+        </div>
+
+        <div class="form-group">
+          <label>System Directive / Persona:</label>
+          <textarea id="settings-system-prompt" class="d-textarea" rows="4">You are an autonomous AI research and software engineering assistant. You reason step-by-step, plan actions carefully, and safely use tools to verify your code.</textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Enabled Agent Tools:</label>
+          <div class="tools-checkbox-grid">
+            <label class="tool-check"><input type="checkbox" checked value="calculator"> Safe Math Calculator</label>
+            <label class="tool-check"><input type="checkbox" checked value="list_directory"> Workspace Inspection</label>
+            <label class="tool-check"><input type="checkbox" checked value="read_file"> File Reader</label>
+            <label class="tool-check"><input type="checkbox" checked value="write_file"> File Writer</label>
+            <label class="tool-check"><input type="checkbox" checked value="search_files"> Text Search</label>
+            <label class="tool-check"><input type="checkbox" checked value="execute_python"> Python Subprocess (10s limit)</label>
+            <label class="tool-check"><input type="checkbox" checked value="run_unit_tests"> Pytest Runner</label>
           </div>
+        </div>
 
-          <!-- Final Report Card -->
-          <div class="final-report-box" id="final-report-container" style="display: none;">
-            <h3>Execution Summary & Report</h3>
-            <pre id="final-report-text"></pre>
+        <div class="form-row">
+          <div class="form-col">
+            <label>Temperature (Creativity):</label>
+            <input type="range" id="settings-temp" min="0.1" max="1.5" step="0.05" value="0.7">
+            <span class="range-val" id="settings-temp-val">0.70</span>
           </div>
-        </section>
-      </div>
-    </main>
-
-    <!-- TAB 2: SmallGPT Playground -->
-    <main class="tab-content" id="tab-gpt">
-      <div class="two-column-layout">
-        <section class="card config-panel">
-          <div class="card-header">
-            <span class="badge badge-yellow">Neural Generation</span>
-            <h2>Inference Settings</h2>
+          <div class="form-col">
+            <label>Top-p (Nucleus):</label>
+            <input type="range" id="settings-topp" min="0.1" max="1.0" step="0.05" value="0.9">
+            <span class="range-val" id="settings-topp-val">0.90</span>
           </div>
+        </div>
 
-          <div class="model-info-box">
-            <p><strong>Active Checkpoint:</strong> <code>GPT-Mini-256 (best_model.pt)</code></p>
-            <p><strong>Architecture:</strong> 6 Layers, 6 Heads, 288 Dims, FlashAttention Pre-LN</p>
-            <p><strong>Vocabulary:</strong> 500 BPE Tokens | <strong>Test Perplexity:</strong> 1.14</p>
+        <button class="btn btn-secondary" id="btn-save-settings">Save Behavior Settings</button>
+      </section>
+
+      <!-- DTAB 4: Live Monitoring & Tests -->
+      <section class="drawer-pane" id="dtab-monitor">
+        <div class="pane-section">
+          <h3>System Vitals & Automated Verification</h3>
+          <p class="pane-help">Monitor GPU memory, run test suite, and inspect scaling benchmarks.</p>
+        </div>
+
+        <div class="vitals-box">
+          <div class="vital-item">
+            <span class="v-label">Hardware Acceleration</span>
+            <span class="v-val" id="v-gpu-name">NVIDIA GeForce RTX 3050</span>
           </div>
-
-          <div class="form-group">
-            <label for="prompt-input">Input Prompt (Python Signature / Docstring):</label>
-            <textarea id="prompt-input" class="form-control code-font" rows="5">def binary_search(arr: list[int], target: int) -> int:
-    """Find index of target in sorted array."""
-</textarea>
+          <div class="vital-item">
+            <span class="v-label">VRAM Allocation</span>
+            <span class="v-val" id="v-vram-usage">0 / 6144 MB</span>
           </div>
-
-          <div class="presets-row">
-            <span>Presets:</span>
-            <button class="btn-chip" data-prompt="def quick_sort(arr: list[int]) -> list[int]:&#10;    &quot;&quot;&quot;Sort array using quicksort.&quot;&quot;&quot;&#10;">QuickSort</button>
-            <button class="btn-chip" data-prompt="def fibonacci(n: int) -> int:&#10;    &quot;&quot;&quot;Compute n-th Fibonacci number.&quot;&quot;&quot;&#10;">Fibonacci</button>
-            <button class="btn-chip" data-prompt="def gcd(a: int, b: int) -> int:&#10;    &quot;&quot;&quot;Greatest Common Divisor.&quot;&quot;&quot;&#10;">GCD</button>
+          <div class="vital-item">
+            <span class="v-label">Active Engine</span>
+            <span class="v-val" id="v-active-model">GPT-Mini-256</span>
           </div>
+        </div>
 
-          <div class="form-group slider-group">
-            <div class="slider-header">
-              <label for="temperature-slider">Temperature:</label>
-              <span id="temp-val">0.70</span>
-            </div>
-            <input type="range" id="temperature-slider" min="0.0" max="1.5" step="0.05" value="0.70">
-          </div>
-
-          <div class="form-group slider-group">
-            <div class="slider-header">
-              <label for="tokens-slider">Max New Tokens:</label>
-              <span id="tokens-val">48</span>
-            </div>
-            <input type="range" id="tokens-slider" min="16" max="128" step="8" value="48">
-          </div>
-
-          <div class="form-group slider-group">
-            <div class="slider-header">
-              <label for="topp-slider">Top-p (Nucleus):</label>
-              <span id="topp-val">0.90</span>
-            </div>
-            <input type="range" id="topp-slider" min="0.1" max="1.0" step="0.05" value="0.90">
-          </div>
-
-          <button class="btn btn-primary" id="btn-generate">
+        <div style="margin: 18px 0;">
+          <button class="btn btn-primary" id="btn-run-all-tests">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Generate Autoregressive Completion
+            Execute Pytest Suite (16 Tests)
           </button>
-        </section>
-
-        <section class="card results-panel">
-          <div class="card-header">
-            <span class="badge badge-green">Generated Output</span>
-            <h2>SmallGPT Completion</h2>
-          </div>
-
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <span class="metric-label">Generated Tokens</span>
-              <span class="metric-val" id="gpt-stat-tokens">-</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-label">Latency</span>
-              <span class="metric-val" id="gpt-stat-latency">-</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-label">Throughput</span>
-              <span class="metric-val" id="gpt-stat-speed">-</span>
-            </div>
-          </div>
-
-          <div class="code-output-container">
-            <pre class="code-font" id="gpt-output-text">Click "Generate Autoregressive Completion" to run inference.</pre>
-          </div>
-        </section>
-      </div>
-    </main>
-
-    <!-- TAB 3: Scaling Laws & Empirical Metrics -->
-    <main class="tab-content" id="tab-research">
-      <div class="card">
-        <div class="card-header">
-          <span class="badge badge-blue">Empirical Data</span>
-          <h2>Research Visualizations & Scaling Laws (RQ1 – RQ5)</h2>
         </div>
 
-        <div class="charts-grid">
-          <div class="chart-item">
-            <h3>Training & Validation Loss Convergence (Exp A)</h3>
-            <img src="/results/training_curves.png" alt="Training loss curves" class="responsive-chart">
-          </div>
-          <div class="chart-item">
-            <h3>Parameter Scale vs. Held-Out Test Perplexity (RQ1)</h3>
-            <img src="/results/scaling_laws_ppl.png" alt="Scaling laws perplexity" class="responsive-chart">
-          </div>
-          <div class="chart-item">
-            <h3>Tokenization Compression & Parameter Overhead (RQ2)</h3>
-            <img src="/results/tokenizer_comparison.png" alt="Tokenizer comparison" class="responsive-chart">
-          </div>
-          <div class="chart-item">
-            <h3>Agent Success Rate & Tool Overhead (RQ3 – RQ5)</h3>
-            <img src="/results/agent_benchmark_comparison.png" alt="Agent benchmark" class="responsive-chart">
-          </div>
+        <div class="terminal-container">
+          <pre class="terminal-text" id="drawer-terminal-output">Ready. Click 'Execute Pytest Suite' to run all tests.</pre>
         </div>
-
-        <div class="table-container">
-          <h3>Quantitative Benchmark Summary Table</h3>
-          <table class="data-table" id="benchmark-summary-table">
-            <thead>
-              <tr>
-                <th>Task ID</th>
-                <th>Category</th>
-                <th>Mode</th>
-                <th>Success</th>
-                <th>Steps</th>
-                <th>Tool Calls</th>
-                <th>Latency (s)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td colspan="7">Loading benchmark records...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </main>
-
-    <!-- TAB 4: Unit Tests & Sandbox Safety -->
-    <main class="tab-content" id="tab-tests">
-      <div class="two-column-layout">
-        <section class="card">
-          <div class="card-header">
-            <span class="badge badge-purple">Verification</span>
-            <h2>Execute Test Suite</h2>
-          </div>
-          <p>Runs all 16 automated unit tests validating causal self-attention masking, weight tying, tokenizers, sandbox path traversal prevention, and agent self-correction.</p>
-          <div style="margin: 20px 0;">
-            <button class="btn btn-primary" id="btn-run-tests">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              Run Pytest (16 Tests)
-            </button>
-          </div>
-          <div class="terminal-container">
-            <pre class="terminal-text" id="tests-terminal-output">Click "Run Pytest" to execute tests.</pre>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-header">
-            <span class="badge badge-green">Safety Guarantees</span>
-            <h2>Security Architecture</h2>
-          </div>
-          <div class="security-list">
-            <div class="security-card">
-              <h4>1. Workspace Canonical Containment</h4>
-              <p>Every file access is strictly validated against the workspace root. Traversal attacks (e.g. <code>../../</code>) raise an immediate <code>SecurityError</code>.</p>
-            </div>
-            <div class="security-card">
-              <h4>2. Untrusted Observation Tagging</h4>
-              <p>Subprocess and file outputs are wrapped inside <code>&lt;OBSERVATION&gt;</code> tags, preventing malicious prompt injections from overriding system rules.</p>
-            </div>
-            <div class="security-card">
-              <h4>3. Subprocess Isolation & Timeouts</h4>
-              <p>Generated code executes in separate subprocesses with strict CPU execution timeouts (10 seconds), preventing infinite loops and fork bombs.</p>
-            </div>
-            <div class="security-card">
-              <h4>4. Destructive Operation Approval Gate</h4>
-              <p>Overwriting existing source code files requires approval, defending against catastrophic code deletion.</p>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
+      </section>
+    </div>
+  </aside>
 
   <script src="app.js"></script>
 </body>
