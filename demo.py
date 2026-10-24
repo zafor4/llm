@@ -35,8 +35,8 @@ def show_menu():
     console.print("\n")
     console.print(
         Panel.fit(
-            "[bold cyan]From Small GPT to an Agentic AI System[/bold cyan]\n"
-            "[green]Pair-programming & Autonomous Research Demonstration[/green]",
+            "[bold cyan]Antigravity AI Platform[/bold cyan]\n"
+            "[green]Production CLI Terminal Runner[/green]",
             border_style="cyan",
         )
     )
@@ -89,7 +89,7 @@ def demo_small_gpt():
     tok_path = Path("results/bpe_500.json")
 
     if not ckpt_path.exists() or not tok_path.exists():
-        console.print("[red]Checkpoint or tokenizer not found. Run `python src/run_experiments.py` first.[/red]")
+        console.print("[red]Checkpoint or tokenizer not found in `results/checkpoints/`.[/red]")
         return
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -121,7 +121,7 @@ def demo_results():
     console.print("\n[bold magenta]=== Empirical Benchmark Summary ===[/bold magenta]")
     csv_path = Path("results/agent_benchmark_results.csv")
     if not csv_path.exists():
-        console.print("[red]Results CSV not found. Run `python src/run_experiments.py` first.[/red]")
+        console.print("[red]Results CSV not found in `results/`.[/red]")
         return
 
     import pandas as pd

@@ -1,0 +1,7 @@
+/* App specific styles (main system defined in index.css) */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
