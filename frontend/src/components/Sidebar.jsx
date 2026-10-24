@@ -16,12 +16,12 @@ export default function Sidebar({ activeApp, setActiveApp, activeModel, vitals }
     { id: 'training', label: 'Model Training Studio', icon: Flame },
     { id: 'models', label: 'Models & Providers', icon: Cpu },
     { id: 'gateway', label: 'External API Gateway', icon: Globe },
+    { id: 'benchmarks', label: 'System Diagnostics', icon: LineChart },
   ];
 
   const productPlayground = [
     { id: 'chat', label: 'ChatGPT Studio', icon: MessageSquare },
     { id: 'agent', label: 'Autonomous Coding Agent', icon: Bot },
-    { id: 'benchmarks', label: 'System Diagnostics', icon: LineChart },
   ];
 
   return (
