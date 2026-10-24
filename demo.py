@@ -35,8 +35,8 @@ def show_menu():
     console.print("\n")
     console.print(
         Panel.fit(
-            "[bold cyan]Antigravity AI Platform[/bold cyan]\n"
-            "[green]Production CLI Terminal Runner[/green]",
+            "[bold cyan]Intelligence Hub[/bold cyan]\n"
+            "[green]CLI runner[/green]",
             border_style="cyan",
         )
     )

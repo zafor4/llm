@@ -185,7 +185,7 @@ export default function BenchmarksApp() {
               Coding Agent Task Performance (SWE-Style Evaluation)
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-              Comparing Zero-Shot direct code generation versus the Antigravity Autonomous Agent Control Loop (Reason-Act-Verify).
+              Comparing zero-shot code generation versus the hub agent control loop (reason–act–verify).
             </p>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>

@@ -1,1 +1,1 @@
-# House of Intelligence — model hub, runtime, resources, and activity.
+# Intelligence Hub — model catalog, runtime, resources, and activity.

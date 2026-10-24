@@ -1,4 +1,4 @@
-"""House of Intelligence — model hub, training, resources, and playgrounds."""
+"""Intelligence Hub — model catalog, training, resources, and playgrounds."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from src.hub.registry import sync_registry
 from src.hub.runtime import bootstrap_default
 
 app = FastAPI(
-    title="House of Intelligence",
+    title="Intelligence Hub",
     description="Control plane for training, cataloging, and serving models, plus playgrounds and an OpenAI-compatible gateway.",
     version="3.0.0",
 )
@@ -59,7 +59,7 @@ def on_startup():
 @app.get("/")
 def root():
     return {
-        "platform": "House of Intelligence",
+        "platform": "Intelligence Hub",
         "status": "ONLINE",
         "version": "3.0.0",
         "docs_url": "/docs",

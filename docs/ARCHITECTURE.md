@@ -1,113 +1,105 @@
-# System Architecture & Technical Design
+# Architecture
 
-## 1. Overview
-
-The **Antigravity AI Platform** is a full-stack, production-grade autonomous intelligence platform combining:
-1. **Frontend Layer**: A modular React 19 single-page application built with Vite and pure CSS tokens.
-2. **Backend Services Layer**: An asynchronous FastAPI service exposing REST and streaming endpoints.
-3. **AI Inference & Training Engine**: A decoder-only causal Transformer (`SmallGPT`) written in PyTorch with FlashAttention SDPA and BPE tokenization.
-4. **Autonomous Agent Sandbox**: An execution runtime that provides tool calling, real-time code execution, and self-correcting unit testing loops.
+Intelligence Hub is a **control plane** around models you train here and models you include (Hugging Face, Ollama). The React UI is a workshop. Other apps should use the OpenAI-compatible `/v1` gateway.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                 Client Layer (Browser / SPA)                │
-│             React 19 + Vite (Port: 3000 / Custom CSS)        │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ HTTP / JSON API / Static Proxy
-┌──────────────────────────────▼──────────────────────────────┐
-│                    FastAPI Gateway (Port: 8000)             │
-├──────────────┬──────────────┬───────────────┬───────────────┤
-│  Dashboard   │ Chat Studio  │ Coding Agent  │ Model Trainer │
-│  Telemetry   │  Inference   │  Loop Runner  │ Worker Thread │
-└──────┬───────┴──────┬───────┴───────┬───────┴───────┬───────┘
-       │              │               │               │
-┌──────▼──────┐┌──────▼───────┐┌──────▼──────┐┌──────▼────────┐
-│ Hardware &  ││ PyTorch Causal││  Sandboxed  ││ Dataset & BPE │
-│ GPU Monitors││ SmallGPT      ││ Environment ││ Optimization  │
-│ (psutil)    ││ (CUDA/Torch)  ││ (Subprocess)││ (AdamW/Cosine)│
-└─────────────┘└──────────────┘└─────────────┘└───────────────┘
+Browser (Vite, port 3000)
+    proxies /api, /v1, /results
+            │
+            ▼
+FastAPI (port 8000)
+    routers: dashboard, models, datasets, resources,
+             trainer, chat, agent, gateway, benchmarks, tests
+            │
+            ▼
+Hub core
+    registry   catalog of local + remote models
+    datasets   include / normalize / load samples
+    runtime    load, activate, generate
+    resources  host snapshot + memory assignment
+    keys       gateway secrets
+            │
+     ┌──────┼──────────────┐
+     ▼      ▼              ▼
+ SmallGPT  HF Transformers  Ollama HTTP
+ (train +  (inference)      (inference)
+  infer)
 ```
 
 ---
 
-## 2. Directory Structure
+## Layers
 
-```
-├── docs/                     # System design, API specifications, and deployment guides
-│   ├── ARCHITECTURE.md       # High-level architecture and system design
-│   ├── API_REFERENCE.md      # REST API endpoints and data schemas
-│   └── DEPLOYMENT.md         # Production setup, Docker, and hardware configuration
-├── frontend/                 # React 19 + Vite Web Application
-│   ├── src/
-│   │   ├── components/       # Dedicated Sub-App components
-│   │   │   ├── Sidebar.jsx           # App switcher navigation
-│   │   │   ├── DashboardApp.jsx      # Mission Control & GPU vitals
-│   │   │   ├── ChatbotApp.jsx        # Conversational assistant
-│   │   │   ├── CodingAgentApp.jsx    # Autonomous SWE-bench agent
-│   │   │   ├── TrainingStudioApp.jsx # Live model trainer
-│   │   │   ├── ModelsFleetApp.jsx    # Checkpoints & external providers
-│   │   │   └── BenchmarksApp.jsx     # System benchmarks & unit tests
-│   │   ├── App.jsx           # Root layout and global state
-│   │   └── index.css         # Production dark glassmorphism design tokens
-│   └── vite.config.js        # Port 3000 config with proxy to Port 8000
-├── results/                  # Checkpoints, tokenizers, and benchmark data
-│   ├── checkpoints/          # Saved model weights (.pt)
-│   ├── bpe_2048.json         # High-compression BPE tokenizer
-│   └── agent_benchmark_results.csv # Agent evaluation data
-├── src/                      # Core Python backend and AI engine
-│   ├── agent/                # Autonomous Agent control loop and planning
-│   │   ├── backends.py       # Pluggable planners (Oracle, Local LLM)
-│   │   ├── loop.py           # Reason-Act-Verify state machine
-│   │   └── state.py          # Execution traces and telemetry
-│   ├── api/                  # FastAPI web services
-│   │   ├── routers/          # Modular API routers
-│   │   │   ├── agent.py      # Goal execution and task endpoints
-│   │   │   ├── benchmarks.py # Benchmark metrics
-│   │   │   ├── chat.py       # Conversational text generation
-│   │   │   ├── dashboard.py  # System and GPU vitals
-│   │   │   ├── models.py     # Checkpoint catalog and hot-swapping
-│   │   │   ├── tests.py      # Automated pytest runner
-│   │   │   └── trainer.py    # Background training thread and status
-│   │   └── main.py           # FastAPI entrypoint
-│   ├── data/                 # Tokenization and dataset pipelines
-│   │   ├── dataset.py        # Causal LM dataset loader
-│   │   └── tokenizer.py      # Byte-Pair Encoding & Character Tokenizers
-│   ├── evaluation/           # Benchmarking harnesses and verification tasks
-│   │   ├── benchmark.py      # Task definitions (TASK_01 to TASK_05)
-│   │   └── evaluate_agents.py# Comparative evaluation runners
-│   ├── model/                # Transformer architecture
-│   │   ├── config.py         # Hyperparameter configurations
-│   │   └── transformer.py    # Pre-LN causal Transformer with SDPA
-│   ├── safety/               # Execution boundary and isolation
-│   │   └── boundary.py       # Path containment and safe sandbox
-│   ├── tools/                # Secure agent tool implementations
-│   │   ├── base.py           # Tool interface
-│   │   └── standard.py       # File, search, calculator, python tools
-│   └── training/             # Model training pipelines
-│       └── trainer.py        # PyTorch training loop with cosine warmup
-├── tests/                    # 16 Comprehensive Unit Tests
-│   ├── test_agent.py         # Autonomous loop validation
-│   ├── test_model.py         # Transformer forward/backward checks
-│   ├── test_tokenizer.py     # Tokenizer roundtrip checks
-│   └── test_tools.py         # Sandbox tool execution checks
-├── demo.py                   # Terminal CLI runner
-├── pyproject.toml            # Build system and pytest configuration
-├── requirements.txt          # Python dependencies
-└── README.md                 # Primary platform documentation
-```
+### UI (`frontend/`)
+
+Single-page app. Pages map 1:1 to workshop jobs: Home, Models, Datasets, Resources, Train, Chat, Tasks, Connect, Health.
+
+Global state in `App.jsx`: active page, active model, catalog, resource vitals. Vite proxies API calls to `127.0.0.1:8000` so the browser stays same-origin.
+
+### API (`src/api/`)
+
+`src/api/main.py` mounts routers and `/results` as static files. On startup it syncs the model registry, ensures the built-in dataset exists, and loads a default local checkpoint if one is present.
+
+### Hub (`src/hub/`)
+
+| Module | Role |
+|---|---|
+| `paths.py` | `results/` locations (checkpoints, datasets, jobs, keys, activity) |
+| `registry.py` | Persist catalog; scan local checkpoint folders |
+| `datasets.py` | Dataset library; write `samples.jsonl`; load texts for training |
+| `runtime.py` | In-memory engines; `generate_text`; chat prompt format |
+| `resources.py` | Device + RAM/VRAM snapshot |
+| `providers.py` | Ollama ping / generate |
+| `keys.py` | Issue and check gateway keys |
+| `activity.py` | Append-only event log |
+
+### Training (`src/training/`, `src/data/`, `src/model/`)
+
+- **SmallGPT** — Pre-LN causal Transformer, SDPA attention, optional weight tying (`src/model/`).
+- **Ingest** — `src/data/ingest.py` turns files into a list of strings. New modalities can add parsers without changing the trainer’s load path.
+- **Dataset** — `CausalLMDataset` slices token ids into next-token blocks.
+- **Trainer** — AdamW + cosine warmup. One background thread. Checkpoints: `results/checkpoints/<name>/best_model.pt` and `final_model.pt`.
+
+Scratch training builds a new `GPTConfig`. Continue/improve loads an existing checkpoint and ignores the size fields from the request.
+
+### Agent (`src/agent/`, `src/tools/`, `src/safety/`)
+
+Reason–act–verify loop in a `WorkspaceSandbox`. Planners:
+
+- **Oracle** — scripted decisions for built-in benchmark tasks (default for those tasks).
+- **Hub runtime** — the active model plans when planner is `active` / `hub` (needs a model that can follow the JSON tool protocol; instruct models are the realistic choice).
 
 ---
 
-## 3. Core Subsystems
+## Data on disk
 
-### 3.1 Causal Transformer (`SmallGPT`)
-- **Pre-LayerNorm Architecture**: Normalized residual streams prevent gradient vanishing or explosion during deep training.
-- **Scaled Dot-Product Attention (SDPA)**: Utilizes PyTorch 2.0+ `F.scaled_dot_product_attention` for memory-efficient FlashAttention kernels.
-- **RoPE & Positional Embeddings**: Supports rotary position embeddings or learned absolute embeddings.
-- **Weight Tying**: Shares weights between input token embeddings and final projection head, reducing total parameters by up to 25%.
+All durable hub state lives under `results/`:
 
-### 3.2 Autonomous Coding Agent
-- **Reason-Act-Verify Loop**:
-  $$\text{Task Goal} \longrightarrow \text{Thought} \longrightarrow \text{Action} \longrightarrow \text{Execution} \longrightarrow \text{Observation} \longrightarrow \text{Self-Correction}$$
-- **Path Confinement**: Prevents path traversal vulnerabilities (`..`) by resolving all file paths within a dedicated sandboxed workspace.
-- **Automated Repair**: When tests fail with a non-zero exit code, the agent inspects the traceback, applies targeted code edits, and re-runs tests until verification succeeds.
+| Path | Contents |
+|---|---|
+| `checkpoints/<name>/` | Local SmallGPT weights + `training_history.json` |
+| `datasets/<id>/` | `samples.jsonl` and optional original file |
+| `hub_registry.json` | Model catalog (local + HF + Ollama) |
+| `hub_datasets.json` | Dataset catalog |
+| `training_jobs.json` | Recent train jobs |
+| `hub_activity.json` | Event log |
+| `api_keys.json` | Gateway keys |
+| `bpe_500.json` | Default local tokenizer |
+
+---
+
+## Request path: chat
+
+1. UI posts `{ message, history, … }` to `POST /api/chat`.
+2. Runtime formats `System` / `User` / `Assistant:` the same way conversation datasets are stored.
+3. The **active** (or requested) engine generates: SmallGPT, Hugging Face, or Ollama.
+4. The playground and `/v1/chat/completions` share this path.
+
+---
+
+## What this is not
+
+- Not a hosted multi-tenant SaaS.
+- Not a fine-tune service for Hugging Face or Ollama weights.
+- Not an always-correct autonomous SWE agent; practice tasks are oracle-backed unless you attach an instruct model and choose the live planner.
+- Chat quality is a property of the **model and dataset**, not of the UI.

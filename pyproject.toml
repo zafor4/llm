@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "small-gpt-agent"
 version = "0.1.0"
-description = "From Small GPT to an Agentic AI System"
+description = "Intelligence Hub — train, catalog, and serve local and included models"
 readme = "README.md"
 requires-python = ">=3.10"
 

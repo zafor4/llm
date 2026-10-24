@@ -44,7 +44,7 @@ def list_models_openai_format():
                 "id": m["id"],
                 "object": "model",
                 "created": int(m.get("created_at") or time.time()),
-                "owned_by": m.get("provider", "house-of-intelligence"),
+                "owned_by": m.get("provider", "intelligence-hub"),
                 "permission": [],
                 "root": m["id"],
                 "parent": None,
