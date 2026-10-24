@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Flame, Square } from 'lucide-react';
+
+const PRESETS = [
+  { id: 'quick', label: 'Quick try', steps: 50, hint: 'A few minutes. Good for a test.' },
+  { id: 'standard', label: 'Standard', steps: 100, hint: 'Balanced default.' },
+  { id: 'longer', label: 'Longer', steps: 250, hint: 'More time, usually better fit.' },
+];
 
 export default function TrainingStudioApp({ onModelTrained, modelsList, continueTarget }) {
   const localModels = (modelsList || []).filter((m) => m.provider === 'local');
   const [mode, setMode] = useState(continueTarget ? 'continue' : 'scratch');
-  const [modelName, setModelName] = useState(continueTarget ? `${continueTarget}-ft` : 'Custom-GPT-Micro');
+  const [modelName, setModelName] = useState(continueTarget ? `${continueTarget}-v2` : 'My-First-Model');
   const [baseModel, setBaseModel] = useState(continueTarget || localModels[0]?.id || '');
+  const [preset, setPreset] = useState('standard');
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [layers, setLayers] = useState(4);
   const [heads, setHeads] = useState(4);
   const [dim, setDim] = useState(192);
   const [blockSize, setBlockSize] = useState(128);
   const [lr, setLr] = useState(0.0005);
-  const [batchSize, setBatchSize] = useState(16);
   const [maxSteps, setMaxSteps] = useState(100);
   const [corpusText, setCorpusText] = useState('');
   const [trainingStatus, setTrainingStatus] = useState(null);
@@ -22,7 +28,7 @@ export default function TrainingStudioApp({ onModelTrained, modelsList, continue
     if (continueTarget) {
       setMode('continue');
       setBaseModel(continueTarget);
-      setModelName(`${continueTarget}-ft`);
+      setModelName(`${continueTarget}-v2`);
     }
   }, [continueTarget]);
 
@@ -36,7 +42,7 @@ export default function TrainingStudioApp({ onModelTrained, modelsList, continue
       const res = await fetch('/api/trainer/status');
       const data = await res.json();
       setTrainingStatus(data);
-      if (data.status === 'COMPLETED' || data.status === 'ERROR' || data.status === 'CANCELLED') {
+      if (['COMPLETED', 'ERROR', 'CANCELLED'].includes(data.status)) {
         setIsTraining(false);
         if (data.status === 'COMPLETED') onModelTrained?.(data.model_name);
       }
@@ -44,7 +50,13 @@ export default function TrainingStudioApp({ onModelTrained, modelsList, continue
     return () => clearInterval(interval);
   }, [isTraining, onModelTrained]);
 
-  const handleStartTraining = async () => {
+  const applyPreset = (id) => {
+    const p = PRESETS.find((x) => x.id === id);
+    setPreset(id);
+    if (p) setMaxSteps(p.steps);
+  };
+
+  const start = async () => {
     setIsTraining(true);
     setTrainingStatus({ status: 'TRAINING', current_step: 0, total_steps: maxSteps });
     try {
@@ -60,14 +72,14 @@ export default function TrainingStudioApp({ onModelTrained, modelsList, continue
           n_embd: dim,
           block_size: blockSize,
           learning_rate: lr,
-          batch_size: batchSize,
+          batch_size: 16,
           max_steps: maxSteps,
           corpus_text: corpusText,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.detail || 'Failed to start');
+        alert(typeof data.detail === 'string' ? data.detail : 'Could not start training.');
         setIsTraining(false);
       }
     } catch (e) {
@@ -76,100 +88,99 @@ export default function TrainingStudioApp({ onModelTrained, modelsList, continue
     }
   };
 
-  const cancel = async () => {
-    await fetch('/api/trainer/cancel', { method: 'POST' });
-  };
-
   const pct = Math.min(100, ((trainingStatus?.current_step || 0) / Math.max(1, trainingStatus?.total_steps || maxSteps)) * 100);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '440px 1fr', gap: 24 }}>
+    <div className="split-2">
       <div className="card-panel">
-        <h3 style={{ marginBottom: 12 }}>Job configuration</h3>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          {['scratch', 'continue'].map((m) => (
-            <button key={m} className={`btn ${mode === m ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setMode(m)}>
-              {m === 'scratch' ? 'From scratch' : 'Continue / finetune'}
-            </button>
-          ))}
+        <h3>New training job</h3>
+        <label className="field-label">What kind of job?</label>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className={`btn ${mode === 'scratch' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setMode('scratch')}>New model</button>
+          <button className={`btn ${mode === 'continue' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setMode('continue')}>Improve one I have</button>
         </div>
-        <label>Output checkpoint name</label>
+
+        <label className="field-label">Name for the result</label>
         <input className="form-input" value={modelName} onChange={(e) => setModelName(e.target.value)} />
+
         {mode === 'continue' && (
-          <div style={{ marginTop: 10 }}>
-            <label>Base local model</label>
+          <>
+            <label className="field-label">Start from</label>
             <select className="form-select" value={baseModel} onChange={(e) => setBaseModel(e.target.value)}>
               {localModels.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
             </select>
-          </div>
+          </>
         )}
-        {mode === 'scratch' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10 }}>
-            <div><label>Layers</label><input className="form-input" type="number" value={layers} onChange={(e) => setLayers(+e.target.value)} /></div>
-            <div><label>Heads</label><input className="form-input" type="number" value={heads} onChange={(e) => setHeads(+e.target.value)} /></div>
-            <div><label>Embed dim</label><input className="form-input" type="number" value={dim} onChange={(e) => setDim(+e.target.value)} /></div>
-            <div><label>Context</label><input className="form-input" type="number" value={blockSize} onChange={(e) => setBlockSize(+e.target.value)} /></div>
-          </div>
-        )}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10 }}>
-          <div><label>Steps</label><input className="form-input" type="number" value={maxSteps} onChange={(e) => setMaxSteps(+e.target.value)} /></div>
-          <div><label>Learning rate</label><input className="form-input" type="number" step="0.0001" value={lr} onChange={(e) => setLr(+e.target.value)} /></div>
+
+        <label className="field-label">How long?</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {PRESETS.map((p) => (
+            <button
+              key={p.id}
+              className={`btn ${preset === p.id ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ justifyContent: 'space-between' }}
+              onClick={() => applyPreset(p.id)}
+            >
+              <span>{p.label}</span>
+              <span className="hint">{p.hint}</span>
+            </button>
+          ))}
         </div>
+
+        <label className="field-label">Your own text (optional)</label>
         <textarea
-          className="form-textarea code-font"
+          className="form-textarea"
           rows={4}
-          style={{ marginTop: 10 }}
-          placeholder="Optional corpus. Blank uses the built-in algorithm set."
+          placeholder="Leave blank to use the built-in coding examples."
           value={corpusText}
           onChange={(e) => setCorpusText(e.target.value)}
         />
-        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-          <button className="btn btn-primary" disabled={isTraining} onClick={handleStartTraining}>
-            <Flame size={16} /> {isTraining ? 'Running…' : 'Start job'}
+
+        <button className="btn btn-secondary" style={{ marginTop: 12 }} onClick={() => setShowAdvanced(!showAdvanced)}>
+          {showAdvanced ? 'Hide extra settings' : 'Show extra settings'}
+        </button>
+        {showAdvanced && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10 }}>
+            <div><label className="field-label">Layers</label><input className="form-input" type="number" value={layers} onChange={(e) => setLayers(+e.target.value)} /></div>
+            <div><label className="field-label">Heads</label><input className="form-input" type="number" value={heads} onChange={(e) => setHeads(+e.target.value)} /></div>
+            <div><label className="field-label">Size</label><input className="form-input" type="number" value={dim} onChange={(e) => setDim(+e.target.value)} /></div>
+            <div><label className="field-label">Context</label><input className="form-input" type="number" value={blockSize} onChange={(e) => setBlockSize(+e.target.value)} /></div>
+            <div><label className="field-label">Steps</label><input className="form-input" type="number" value={maxSteps} onChange={(e) => { setMaxSteps(+e.target.value); setPreset('custom'); }} /></div>
+            <div><label className="field-label">Learning rate</label><input className="form-input" type="number" step="0.0001" value={lr} onChange={(e) => setLr(+e.target.value)} /></div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+          <button className="btn btn-primary" disabled={isTraining} onClick={start}>
+            {isTraining ? 'Training…' : 'Start training'}
           </button>
           {isTraining && (
-            <button className="btn btn-secondary" onClick={cancel}><Square size={14} /> Cancel</button>
+            <button className="btn btn-secondary" onClick={() => fetch('/api/trainer/cancel', { method: 'POST' })}>Stop</button>
           )}
         </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div className="card-panel">
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{trainingStatus?.status || 'IDLE'} · {trainingStatus?.mode || mode}</div>
-              <h3>{trainingStatus?.model_name || modelName}</h3>
-            </div>
-            <div>Step {trainingStatus?.current_step || 0} / {trainingStatus?.total_steps || maxSteps}</div>
+          <div className="hint">{trainingStatus?.status || 'Waiting'}</div>
+          <h3 style={{ margin: '4px 0 12px' }}>{trainingStatus?.model_name || modelName}</h3>
+          <div className="progress-track" style={{ marginBottom: 14 }}>
+            <div className="progress-fill" style={{ width: `${pct}%` }} />
           </div>
-          <div style={{ height: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden', margin: '12px 0' }}>
-            <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, var(--accent-amber), var(--accent-rose))' }} />
+          <div className="stat-grid">
+            <div><div className="hint">Step</div><strong>{trainingStatus?.current_step || 0} / {trainingStatus?.total_steps || maxSteps}</strong></div>
+            <div><div className="hint">How well it fits</div><strong>{trainingStatus?.val_perplexity || '—'}</strong></div>
+            <div><div className="hint">Speed</div><strong>{trainingStatus?.tokens_per_sec || 0}</strong></div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-            {[
-              ['Loss', trainingStatus?.current_loss || 0],
-              ['Val PPL', trainingStatus?.val_perplexity || 0],
-              ['tok/s', trainingStatus?.tokens_per_sec || 0],
-              ['VRAM', `${trainingStatus?.peak_vram_mb || 0} MB`],
-            ].map(([k, v]) => (
-              <div key={k} style={{ background: 'var(--bg-input)', padding: 10, borderRadius: 8 }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{k}</div>
-                <div style={{ fontFamily: 'var(--font-mono)' }}>{v}</div>
-              </div>
-            ))}
-          </div>
-          {trainingStatus?.error_message && (
-            <p style={{ color: '#f87171', marginTop: 10 }}>{trainingStatus.error_message}</p>
-          )}
+          {trainingStatus?.error_message && <p className="notice error" style={{ marginTop: 12 }}>{trainingStatus.error_message}</p>}
         </div>
-
         <div className="card-panel">
-          <h3 style={{ marginBottom: 10 }}>Job history</h3>
-          {jobs.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No jobs recorded yet.</p>}
+          <h3 style={{ marginBottom: 10 }}>Recent jobs</h3>
+          {jobs.length === 0 && <p className="hint">Nothing trained yet.</p>}
           {jobs.map((j) => (
-            <div key={j.job_id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)', fontSize: '0.85rem' }}>
-              <span>{j.model_name} · {j.mode || 'scratch'}</span>
-              <span style={{ color: j.status === 'COMPLETED' ? '#34d399' : '#94a3b8' }}>{j.status}</span>
+            <div key={j.job_id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+              <span>{j.model_name}</span>
+              <span className="hint">{j.status === 'COMPLETED' ? 'Done' : j.status}</span>
             </div>
           ))}
         </div>

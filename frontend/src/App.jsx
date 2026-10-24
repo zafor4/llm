@@ -8,7 +8,6 @@ import ModelsFleetApp from './components/ModelsFleetApp';
 import BenchmarksApp from './components/BenchmarksApp';
 import ApiGatewayApp from './components/ApiGatewayApp';
 import ResourcesApp from './components/ResourcesApp';
-import { Activity, Layers } from 'lucide-react';
 import './App.css';
 
 export default function App() {
@@ -29,7 +28,7 @@ export default function App() {
         setActiveModel(data.active_model || data.active_checkpoint);
       }
     } catch {
-      /* backend offline */
+      /* offline */
     }
   }, []);
 
@@ -38,12 +37,11 @@ export default function App() {
       const res = await fetch('/api/models/list');
       if (!res.ok) return;
       const data = await res.json();
-      const list = data.models || data.available_models || [];
-      setModelsList(list);
+      setModelsList(data.models || []);
       setLoadedModels(data.loaded_models || []);
       if (data.active_model) setActiveModel(data.active_model);
     } catch {
-      /* backend offline */
+      /* offline */
     }
   }, []);
 
@@ -54,24 +52,19 @@ export default function App() {
 
   useEffect(() => {
     refreshHub();
-    const interval = setInterval(fetchVitals, 4000);
+    const interval = setInterval(fetchVitals, 5000);
     return () => clearInterval(interval);
   }, [refreshHub, fetchVitals]);
 
   const titles = {
-    dashboard: 'Control Center',
-    chat: 'Chat Playground',
-    agent: 'Agent Playground',
-    training: 'Training Jobs',
-    models: 'Model Catalog',
-    resources: 'Resource Manager',
-    gateway: 'API Sharing',
-    benchmarks: 'Diagnostics',
-  };
-
-  const openContinueTraining = (modelId) => {
-    setContinueTarget(modelId);
-    setActiveApp('training');
+    dashboard: ['Home', 'Start here. Train, add, or try a model.'],
+    models: ['Models', 'Everything you own, plus what is in memory.'],
+    resources: ['Resources', 'See this computer, include models, and free memory.'],
+    training: ['Train', 'Create a new model or improve one you already have.'],
+    chat: ['Chat', 'A quick way to talk to the model you are using.'],
+    agent: ['Tasks', 'Watch an agent work through a practice job.'],
+    gateway: ['Connect', 'Let other apps use your models.'],
+    benchmarks: ['Health', 'Checks and recorded results.'],
   };
 
   return (
@@ -85,24 +78,15 @@ export default function App() {
 
       <main className="main-viewport">
         <header className="top-app-bar">
-          <div className="top-bar-title">
-            <h2>{titles[activeApp] || 'Intelligence Hub'}</h2>
-            <div className="active-model-badge">Serving: {activeModel || 'none'}</div>
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem' }}>
+              {titles[activeApp]?.[0] || 'Hub'}
+            </h2>
+            <p className="hint">{titles[activeApp]?.[1]}</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-              <Activity size={14} color="var(--accent-emerald)" />
-              <span>VRAM {vitals.vram_used_mb || 0} / {vitals.vram_total_mb || 0} MB</span>
-            </div>
-            <button
-              className="btn btn-secondary"
-              style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-              onClick={() => setActiveApp('models')}
-            >
-              <Layers size={14} />
-              Manage Models
-            </button>
-          </div>
+          <button className="btn btn-secondary" onClick={() => setActiveApp('models')}>
+            Using {activeModel || 'none'} · change
+          </button>
         </header>
 
         <section className="app-content-view">
@@ -136,20 +120,25 @@ export default function App() {
           {activeApp === 'models' && (
             <ModelsFleetApp
               activeModel={activeModel}
+              loadedModels={loadedModels}
               onSelectModel={(m) => {
                 setActiveModel(m);
                 refreshHub();
               }}
-              onContinueTrain={openContinueTraining}
+              onContinueTrain={(id) => {
+                setContinueTarget(id);
+                setActiveApp('training');
+              }}
               onRefresh={refreshHub}
             />
           )}
           {activeApp === 'resources' && (
             <ResourcesApp
-              vitals={vitals}
-              loadedModels={loadedModels}
-              activeModel={activeModel}
               onRefresh={refreshHub}
+              onSelectModel={(m) => {
+                setActiveModel(m);
+                refreshHub();
+              }}
             />
           )}
           {activeApp === 'gateway' && <ApiGatewayApp activeModel={activeModel} />}

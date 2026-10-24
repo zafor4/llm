@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from src.api.routers import agent, benchmarks, chat, dashboard, gateway, models, tests, trainer
+from src.api.routers import agent, benchmarks, chat, dashboard, gateway, models, resources, tests, trainer
 from src.hub.activity import log_event
 from src.hub.paths import RESULTS_DIR
 from src.hub.registry import sync_registry
@@ -33,6 +33,7 @@ app.add_middleware(
 )
 
 app.include_router(dashboard.router)
+app.include_router(resources.router)
 app.include_router(models.router)
 app.include_router(chat.router)
 app.include_router(agent.router)

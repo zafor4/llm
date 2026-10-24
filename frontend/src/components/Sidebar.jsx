@@ -1,46 +1,44 @@
 import React from 'react';
 import {
-  LayoutDashboard,
+  Home,
   MessageSquare,
-  Bot,
-  Cpu,
-  Flame,
-  LineChart,
-  Sparkles,
-  Globe,
+  ListChecks,
+  Boxes,
+  PlusCircle,
   Gauge,
+  Share2,
+  HeartPulse,
+  Sparkles,
 } from 'lucide-react';
 
 export default function Sidebar({ activeApp, setActiveApp, activeModel, vitals }) {
-  const controlPlane = [
-    { id: 'dashboard', label: 'Control Center', icon: LayoutDashboard },
-    { id: 'models', label: 'Model Catalog', icon: Cpu },
-    { id: 'training', label: 'Training Jobs', icon: Flame },
-    { id: 'resources', label: 'Resources', icon: Gauge },
-    { id: 'gateway', label: 'API Sharing', icon: Globe },
-    { id: 'benchmarks', label: 'Diagnostics', icon: LineChart },
+  const main = [
+    { id: 'dashboard', label: 'Home', sub: 'What to do next', icon: Home },
+    { id: 'models', label: 'Models', sub: 'Your library', icon: Boxes },
+    { id: 'resources', label: 'Resources', sub: 'Memory and GPU', icon: Gauge },
+    { id: 'training', label: 'Train', sub: 'Create or improve', icon: PlusCircle },
+  ];
+  const tryItems = [
+    { id: 'chat', label: 'Chat', sub: 'Talk to a model', icon: MessageSquare },
+    { id: 'agent', label: 'Tasks', sub: 'Try an agent', icon: ListChecks },
   ];
 
-  const playgrounds = [
-    { id: 'chat', label: 'Chat Playground', icon: MessageSquare },
-    { id: 'agent', label: 'Agent Playground', icon: Bot },
-  ];
-
-  const renderGroup = (items) =>
-    items.map((item) => {
-      const Icon = item.icon;
-      const isActive = activeApp === item.id;
-      return (
-        <button
-          key={item.id}
-          className={`nav-item ${isActive ? 'active' : ''}`}
-          onClick={() => setActiveApp(item.id)}
-        >
-          <Icon size={18} />
-          <span>{item.label}</span>
-        </button>
-      );
-    });
+  const row = (item) => {
+    const Icon = item.icon;
+    return (
+      <button
+        key={item.id}
+        className={`nav-item ${activeApp === item.id ? 'active' : ''}`}
+        onClick={() => setActiveApp(item.id)}
+      >
+        <Icon size={18} />
+        <span>
+          {item.label}
+          <span className="nav-sub">{item.sub}</span>
+        </span>
+      </button>
+    );
+  };
 
   return (
     <aside className="sidebar">
@@ -50,28 +48,37 @@ export default function Sidebar({ activeApp, setActiveApp, activeModel, vitals }
         </div>
         <div className="brand-info">
           <h1>Intelligence Hub</h1>
-          <span>Control plane</span>
+          <span>Your model workshop</span>
         </div>
       </div>
 
       <nav className="sidebar-nav">
-        <div className="nav-section-title">Control Plane</div>
-        {renderGroup(controlPlane)}
-        <div className="nav-section-title" style={{ marginTop: '1rem' }}>Playgrounds</div>
-        {renderGroup(playgrounds)}
+        <div className="nav-section-title">Workshop</div>
+        {main.map(row)}
+        <div className="nav-section-title">Try</div>
+        {tryItems.map(row)}
+        <div className="nav-section-title">Share</div>
+        {row({ id: 'gateway', label: 'Connect', sub: 'Use in other apps', icon: Share2 })}
       </nav>
 
       <div className="sidebar-footer">
-        <div className="system-pill">
-          <span className="pulse-dot"></span>
+        <button
+          className={`nav-item ${activeApp === 'benchmarks' ? 'active' : ''}`}
+          onClick={() => setActiveApp('benchmarks')}
+          style={{ marginBottom: 10 }}
+        >
+          <HeartPulse size={16} />
           <span>
-            {vitals?.cuda_available
-              ? `${(vitals.device_name || 'GPU').split(' ').slice(-2).join(' ')} • ${vitals.vram_used_mb || 0}MB`
-              : 'CPU Host Active'}
+            Health
+            <span className="nav-sub">Tests and reports</span>
           </span>
+        </button>
+        <div className="system-pill">
+          <span className="pulse-dot" />
+          <span>{vitals?.cuda_available ? 'GPU ready' : 'Running on CPU'}</span>
         </div>
-        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 6 }}>
-          Active: {activeModel || 'none'}
+        <div className="hint" style={{ marginTop: 6 }}>
+          Using {activeModel || 'no model yet'}
         </div>
       </div>
     </aside>

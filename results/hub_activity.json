@@ -89,26 +89,57 @@
     }
   },
   {
-    "id": "5ad141a8dea3",
-    "ts": 1792857331.3043404,
+    "id": "e736179201fc",
+    "ts": 1792857552.4295492,
     "kind": "registry",
     "level": "info",
     "source": "hub",
-    "message": "Registered model 'demo-ollama' (ollama)",
+    "message": "Registered model 'Qwen2.5-0.5B-Instruct' (huggingface)",
     "meta": {
-      "id": "demo-ollama"
+      "id": "Qwen2.5-0.5B-Instruct"
     }
   },
   {
-    "id": "36d8dc1e764d",
-    "ts": 1792857331.307346,
-    "kind": "registry",
+    "id": "c56ba0ff9106",
+    "ts": 1792858088.7633834,
+    "kind": "chat",
     "level": "info",
     "source": "hub",
-    "message": "Removed model 'demo-ollama'",
+    "message": "Completion via GPT-Mini-256",
     "meta": {
-      "id": "demo-ollama",
-      "deleted_files": false
+      "latency": 0.497
     }
+  },
+  {
+    "id": "672ce1f10c35",
+    "ts": 1792858237.16527,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "354610b5f45d",
+    "ts": 1792858237.1667747,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "59d961a8967f",
+    "ts": 1792858237.1677814,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
   }
 ]

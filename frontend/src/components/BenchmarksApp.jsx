@@ -52,8 +52,8 @@ export default function BenchmarksApp() {
     <div className="benchmarks-app">
       <div className="app-header">
         <div>
-          <h2>System Benchmarks & Verification</h2>
-          <p>Real-time engine throughput, autonomous task benchmarks, and automated test diagnostics</p>
+          <h2>Health</h2>
+          <p>Recorded results and a one-click check that the hub still works.</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button 
@@ -74,28 +74,28 @@ export default function BenchmarksApp() {
           onClick={() => setActiveTab('models')}
           style={{ fontSize: '0.875rem' }}
         >
-          Model Performance & Throughput
+          Models
         </button>
         <button 
           className={`btn ${activeTab === 'agent' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setActiveTab('agent')}
           style={{ fontSize: '0.875rem' }}
         >
-          Coding Agent Benchmarks
+          Tasks
         </button>
         <button 
           className={`btn ${activeTab === 'tests' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setActiveTab('tests')}
           style={{ fontSize: '0.875rem' }}
         >
-          Automated Test Suite
+          Run checks
         </button>
         <button 
           className={`btn ${activeTab === 'docs' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setActiveTab('docs')}
           style={{ fontSize: '0.875rem' }}
         >
-          Production Documentation
+          Docs
         </button>
       </div>
 
