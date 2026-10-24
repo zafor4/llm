@@ -8,7 +8,7 @@ import os
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
@@ -117,9 +117,13 @@ class GPTTrainer:
         self.scaler = torch.amp.GradScaler(enabled=(args.mixed_precision and self.device.type == "cuda"))
         self.history: List[Dict[str, Any]] = []
         self.best_val_loss = float("inf")
+        self.stop_requested = False
 
         self.checkpoint_dir = Path(args.checkpoint_dir)
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
+
+    def request_stop(self) -> None:
+        self.stop_requested = True
 
     @torch.no_grad()
     def evaluate(self) -> Dict[str, float]:
@@ -142,17 +146,24 @@ class GPTTrainer:
         self.model.train()
         return {"val_loss": avg_loss, "val_perplexity": perplexity}
 
-    def train(self) -> Dict[str, Any]:
+    def train(
+        self,
+        on_log: Optional[Callable[[Dict[str, Any]], None]] = None,
+        should_stop: Optional[Callable[[], bool]] = None,
+    ) -> Dict[str, Any]:
         """Main training loop across step budget."""
         self.model.train()
         step = 0
         train_iter = iter(self.train_loader)
         start_time = time.time()
         tokens_processed = 0
+        val_metrics = {"val_loss": 0.0, "val_perplexity": 0.0}
 
         print(f"Starting training on {self.device.type} ({self.model.get_num_params():,} parameters)...")
 
         while step < self.args.max_steps:
+            if self.stop_requested or (should_stop and should_stop()):
+                break
             try:
                 x, y = next(train_iter)
             except StopIteration:
@@ -184,6 +195,18 @@ class GPTTrainer:
 
             step += 1
 
+            if on_log:
+                on_log(
+                    {
+                        "step": step,
+                        "train_loss": loss.item(),
+                        "val_loss": val_metrics.get("val_loss", 0.0),
+                        "val_perplexity": val_metrics.get("val_perplexity", 0.0),
+                        "tokens_per_sec": tokens_processed / max(0.001, time.time() - start_time),
+                        "partial": True,
+                    }
+                )
+
             # Periodic Evaluation & Checkpoint Logging
             if step % self.args.eval_interval == 0 or step == self.args.max_steps:
                 val_metrics = self.evaluate()
@@ -208,6 +231,8 @@ class GPTTrainer:
                     "peak_gpu_mb": peak_gpu_mb,
                 }
                 self.history.append(log_entry)
+                if on_log:
+                    on_log({**log_entry, "partial": False})
 
                 print(
                     f"Step {step:4d}/{self.args.max_steps} | "

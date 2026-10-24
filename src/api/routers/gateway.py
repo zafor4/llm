@@ -1,21 +1,20 @@
-"""OpenAI-compatible External API Gateway for the House of Intelligence.
-
-Allows any external tool, script, LangChain app, or IDE extension to consume
-the active models via standard `/v1/chat/completions` and `/v1/models` routes.
-"""
+"""OpenAI-compatible gateway plus local API key management."""
 
 from __future__ import annotations
 
 import time
 import uuid
-from typing import Any, Dict, List, Optional
-import torch
+from typing import List, Optional
+
 from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from src.api.routers import models as model_state
+from src.hub.activity import log_event
+from src.hub.keys import create_key, list_keys, revoke_key, validate_bearer
+from src.hub.runtime import active_model_id, format_chat_prompt, generate_text, loaded_models
+from src.hub.registry import list_models as catalog_list
 
-router = APIRouter(prefix="/v1", tags=["OpenAI Compatible Gateway"])
+router = APIRouter(tags=["OpenAI Compatible Gateway"])
 
 
 class ChatMessage(BaseModel):
@@ -32,93 +31,104 @@ class ChatCompletionRequest(BaseModel):
     stream: Optional[bool] = False
 
 
-@router.get("/models")
+class KeyCreateRequest(BaseModel):
+    label: str = "shared"
+
+
+@router.get("/v1/models")
 def list_models_openai_format():
-    """Returns models in standard OpenAI `/v1/models` response format."""
-    model_list = model_state.list_models()
     data = []
-    for m in model_list.get("models", []):
-        data.append({
-            "id": m["id"],
-            "object": "model",
-            "created": int(time.time()),
-            "owned_by": m.get("provider", "house-of-intelligence"),
-            "permission": [],
-            "root": m["id"],
-            "parent": None,
-        })
-
-    return {
-        "object": "list",
-        "data": data,
-    }
+    for m in catalog_list():
+        data.append(
+            {
+                "id": m["id"],
+                "object": "model",
+                "created": int(m.get("created_at") or time.time()),
+                "owned_by": m.get("provider", "house-of-intelligence"),
+                "permission": [],
+                "root": m["id"],
+                "parent": None,
+            }
+        )
+    return {"object": "list", "data": data}
 
 
-@router.post("/chat/completions")
+@router.post("/v1/chat/completions")
 def create_chat_completion(
     req: ChatCompletionRequest,
     authorization: Optional[str] = Header(None),
 ):
-    """Standard OpenAI-compatible Chat Completion endpoint."""
-    target_model = req.model or model_state.ACTIVE_MODEL_NAME
+    if not validate_bearer(authorization):
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
-    # Ensure model is active
-    if target_model != model_state.ACTIVE_MODEL_NAME:
-        # Attempt dynamic hot-swap if requested model exists
-        model_state.load_checkpoint(target_model)
+    target = req.model or active_model_id()
+    if not target:
+        raise HTTPException(status_code=503, detail="No intelligence model is currently loaded.")
 
-    active_model = model_state.ACTIVE_MODEL
-    active_tok = model_state.ACTIVE_TOKENIZER
-
-    if active_model is None or active_tok is None:
-        raise HTTPException(
-            status_code=503,
-            detail="No intelligence model is currently loaded in memory."
-        )
-
-    # Format user prompt from messages
-    prompt = ""
+    user_text = ""
+    history = []
+    system_prompt = None
     for msg in req.messages:
-        prompt += f"{msg.role.capitalize()}: {msg.content}\n"
-    prompt += "Assistant: "
+        if msg.role == "system":
+            system_prompt = msg.content
+        elif msg.role == "user":
+            user_text = msg.content
+            history.append({"role": msg.role, "content": msg.content})
+        else:
+            history.append({"role": msg.role, "content": msg.content})
+    if history and history[-1]["role"] == "user":
+        history = history[:-1]
 
-    # Tokenize and infer
-    device = model_state.DEVICE
-    tokens = active_tok.encode(prompt)
-    prompt_token_count = len(tokens)
-    idx = torch.tensor([tokens], dtype=torch.long, device=device)
-
-    with torch.no_grad():
-        out_tokens = active_model.generate(
-            idx,
-            max_new_tokens=min(req.max_tokens or 128, 256),
+    prompt = format_chat_prompt(user_text or "Hello", history=history, system_prompt=system_prompt)
+    try:
+        result = generate_text(
+            prompt,
+            model_id=target,
+            max_tokens=min(req.max_tokens or 128, 512),
             temperature=req.temperature or 0.7,
             top_p=req.top_p or 0.9,
         )
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    completion_tokens = out_tokens[0].tolist()[prompt_token_count:]
-    generated_text = active_tok.decode(completion_tokens).strip()
-
-    # Build standard OpenAI response structure
-    completion_id = f"chatcmpl-{uuid.uuid4().hex[:12]}"
+    log_event("gateway", f"/v1 completion via {result['model']}", meta={"latency": result["latency_sec"]})
     return {
-        "id": completion_id,
+        "id": f"chatcmpl-{uuid.uuid4().hex[:12]}",
         "object": "chat.completion",
         "created": int(time.time()),
-        "model": target_model,
+        "model": result["model"],
         "choices": [
             {
                 "index": 0,
-                "message": {
-                    "role": "assistant",
-                    "content": generated_text,
-                },
+                "message": {"role": "assistant", "content": result["text"]},
                 "finish_reason": "stop",
             }
         ],
         "usage": {
-            "prompt_tokens": prompt_token_count,
-            "completion_tokens": len(completion_tokens),
-            "total_tokens": prompt_token_count + len(completion_tokens),
+            "prompt_tokens": 0,
+            "completion_tokens": result["tokens_requested"],
+            "total_tokens": result["tokens_requested"],
         },
     }
+
+
+@router.get("/api/gateway/status")
+def gateway_status():
+    return {
+        "base_url": "http://127.0.0.1:8000/v1",
+        "active_model": active_model_id(),
+        "loaded_models": loaded_models(),
+        "keys": list_keys(),
+    }
+
+
+@router.post("/api/gateway/keys")
+def issue_key(req: KeyCreateRequest):
+    return {"success": True, "key": create_key(req.label)}
+
+
+@router.delete("/api/gateway/keys/{key_id}")
+def delete_key(key_id: str):
+    if not revoke_key(key_id):
+        raise HTTPException(status_code=404, detail="Key not found")
+    return {"success": True}

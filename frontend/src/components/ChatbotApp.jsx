@@ -1,254 +1,132 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Send, Trash2, Sliders, Sparkles, Copy, Check, Bot } from 'lucide-react';
 
-export default function ChatbotApp({ activeModel, modelsList, setActiveModel }) {
+export default function ChatbotApp({ activeModel, modelsList, setActiveModel, onRefresh }) {
   const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: `Hello! I am your conversational coding assistant powered by **${activeModel}**. Ask me to write algorithms, explain code, or generate Python routines.`,
-    },
+    { role: 'assistant', content: 'Playground chat. History is sent to the active hub engine. Product apps should use /v1 instead.' },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(64);
+  const [systemPrompt, setSystemPrompt] = useState('You are a concise coding assistant.');
   const [showSettings, setShowSettings] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState(null);
-
-  const messagesEndRef = useRef(null);
+  const endRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  const switchModel = async (id) => {
+    setActiveModel?.(id);
+    await fetch('/api/models/load', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model_name: id, activate: true }),
+    });
+    onRefresh?.();
+  };
 
   const handleSend = async (textToSend = null) => {
     const query = textToSend || input;
     if (!query.trim() || loading) return;
-
     const userMsg = { role: 'user', content: query.trim() };
-    setMessages((prev) => [...prev, userMsg]);
+    const next = [...messages, userMsg];
+    setMessages(next);
     setInput('');
     setLoading(true);
-
     try {
+      const history = next
+        .filter((m) => m.role === 'user' || m.role === 'assistant')
+        .slice(0, -1)
+        .map((m) => ({ role: m.role, content: m.content }));
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: query.trim(),
+          history,
           temperature,
           max_tokens: maxTokens,
+          system_prompt: systemPrompt,
+          model: activeModel,
         }),
       });
-
       const data = await res.json();
       setMessages((prev) => [
         ...prev,
-        {
-          role: 'assistant',
-          content: data.content,
-          latency: data.latency_sec,
-          model: data.model_used,
-        },
+        { role: 'assistant', content: data.content || data.detail || 'No response', latency: data.latency_sec, model: data.model_used },
       ]);
     } catch (e) {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: `Error: ${e.message}. Ensure backend server is running.` },
-      ]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: `Error: ${e.message}` }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const copyToClipboard = (text, idx) => {
-    navigator.clipboard.writeText(text);
-    setCopiedIndex(idx);
-    setTimeout(() => setCopiedIndex(null), 2000);
-  };
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)', maxWidth: '960px', margin: '0 auto' }}>
-      {/* Chat Top Controls */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid var(--border-subtle)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Engine:</span>
-          <select 
-            className="form-select" 
-            style={{ width: 'auto', padding: '6px 12px', fontSize: '0.8125rem' }}
-            value={activeModel}
-            onChange={(e) => setActiveModel(e.target.value)}
-          >
-            {modelsList.map((m) => (
-              <option key={m.id} value={m.name}>{m.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button 
-            className="btn btn-secondary" 
-            style={{ padding: '6px 12px', fontSize: '0.8125rem' }}
-            onClick={() => setShowSettings(!showSettings)}
-          >
-            <Sliders size={14} />
-            Parameters
-          </button>
-          <button 
-            className="btn btn-secondary" 
-            style={{ padding: '6px 12px', fontSize: '0.8125rem', color: 'var(--accent-rose)' }}
-            onClick={() => setMessages([])}
-          >
-            <Trash2 size={14} />
-            Clear
-          </button>
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)', maxWidth: 960, margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+        <select className="form-select" style={{ width: 'auto' }} value={activeModel || ''} onChange={(e) => switchModel(e.target.value)}>
+          {(modelsList || []).map((m) => (
+            <option key={m.id || m} value={m.id || m}>{m.name || m}</option>
+          ))}
+        </select>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-secondary" onClick={() => setShowSettings(!showSettings)}><Sliders size={14} /> Parameters</button>
+          <button className="btn btn-secondary" onClick={() => setMessages([])}><Trash2 size={14} /> Clear</button>
         </div>
       </div>
 
-      {/* Collapsible Parameters Drawer */}
       {showSettings && (
-        <div className="card-panel" style={{ padding: '16px', marginBottom: '14px', background: 'var(--bg-input)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <div className="card-panel" style={{ marginBottom: 12 }}>
+          <label>System prompt</label>
+          <input className="form-input" value={systemPrompt} onChange={(e) => setSystemPrompt(e.target.value)} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 10 }}>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                <span>Temperature (Creativity):</span>
-                <span>{temperature.toFixed(2)}</span>
-              </div>
-              <input 
-                type="range" 
-                min="0.1" 
-                max="1.5" 
-                step="0.05" 
-                value={temperature}
-                onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                style={{ width: '100%', accentColor: 'var(--accent-blue)' }}
-              />
+              <span>Temperature {temperature.toFixed(2)}</span>
+              <input type="range" min="0.1" max="1.5" step="0.05" value={temperature} onChange={(e) => setTemperature(+e.target.value)} style={{ width: '100%' }} />
             </div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                <span>Max New Tokens:</span>
-                <span>{maxTokens}</span>
-              </div>
-              <input 
-                type="range" 
-                min="16" 
-                max="128" 
-                step="8" 
-                value={maxTokens}
-                onChange={(e) => setMaxTokens(parseInt(e.target.value))}
-                style={{ width: '100%', accentColor: 'var(--accent-blue)' }}
-              />
+              <span>Max tokens {maxTokens}</span>
+              <input type="range" min="16" max="256" step="8" value={maxTokens} onChange={(e) => setMaxTokens(+e.target.value)} style={{ width: '100%' }} />
             </div>
           </div>
         </div>
       )}
 
-      {/* Messages Scroll Area */}
-      <div style={{ flex: 1, overflowY: 'auto', paddingRight: '6px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {messages.map((m, idx) => {
-          const isUser = m.role === 'user';
-          return (
-            <div 
-              key={idx} 
-              style={{ 
-                display: 'flex', 
-                gap: '12px', 
-                alignSelf: isUser ? 'flex-end' : 'flex-start',
-                maxWidth: '85%'
-              }}
-            >
-              {!isUser && (
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'white' }}>
-                  <Bot size={16} />
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {messages.map((m, idx) => (
+          <div key={idx} style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+            <div className="card-panel" style={{ padding: 14, background: m.role === 'user' ? 'linear-gradient(135deg,#1e3a8a,#2563eb)' : undefined }}>
+              <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
+              {m.role !== 'user' && (
+                <div style={{ marginTop: 8, fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{m.model || activeModel} {m.latency ? `· ${m.latency}s` : ''}</span>
+                  <button style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }} onClick={() => { navigator.clipboard.writeText(m.content); setCopiedIndex(idx); }}>
+                    {copiedIndex === idx ? <Check size={12} /> : <Copy size={12} />}
+                  </button>
                 </div>
               )}
-
-              <div 
-                style={{ 
-                  background: isUser ? 'linear-gradient(135deg, #1e3a8a, #2563eb)' : 'var(--bg-card)', 
-                  border: isUser ? 'none' : '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '12px 16px',
-                  color: '#ffffff',
-                  fontSize: '0.9375rem',
-                  lineHeight: 1.55,
-                  position: 'relative',
-                }}
-              >
-                <div style={{ whiteSpace: 'pre-wrap', fontFamily: m.content.includes('def ') ? 'var(--font-mono)' : 'var(--font-sans)', fontSize: m.content.includes('def ') ? '0.85rem' : '0.9375rem' }}>
-                  {m.content}
-                </div>
-
-                {!isUser && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
-                    <span>{m.model || activeModel} {m.latency ? `• ${m.latency}s` : ''}</span>
-                    <button 
-                      style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                      onClick={() => copyToClipboard(m.content, idx)}
-                    >
-                      {copiedIndex === idx ? <Check size={12} color="var(--accent-emerald)" /> : <Copy size={12} />}
-                      <span>{copiedIndex === idx ? 'Copied' : 'Copy'}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-
-        {loading && (
-          <div style={{ display: 'flex', gap: '12px', alignSelf: 'flex-start' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-              <Bot size={16} />
-            </div>
-            <div className="card-panel" style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="pulse-dot" style={{ background: 'var(--accent-blue)' }}></span>
-              <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{activeModel} generating tokens...</span>
             </div>
           </div>
-        )}
-        <div ref={messagesEndRef} />
+        ))}
+        {loading && <div className="card-panel" style={{ width: 'fit-content' }}><Bot size={14} /> generating…</div>}
+        <div ref={endRef} />
       </div>
 
-      {/* Preset Chips */}
-      <div style={{ display: 'flex', gap: '8px', margin: '10px 0', overflowX: 'auto', paddingBottom: '4px' }}>
-        {[
-          'def quick_sort(arr: list[int]) -> list[int]:',
-          'def binary_search(arr: list[int], target: int) -> int:',
-          'def fibonacci(n: int) -> int:',
-          'def is_palindrome(s: str) -> bool:',
-        ].map((preset, i) => (
-          <button 
-            key={i} 
-            className="btn btn-secondary" 
-            style={{ fontSize: '0.75rem', padding: '4px 10px', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)' }}
-            onClick={() => handleSend(preset)}
-          >
-            <Sparkles size={11} color="var(--accent-blue)" />
-            {preset.split('(')[0].replace('def ', '')}()
+      <div style={{ display: 'flex', gap: 8, margin: '10px 0', overflowX: 'auto' }}>
+        {['def quick_sort(arr):', 'def binary_search(arr, target):', 'Explain residual connections'].map((p) => (
+          <button key={p} className="btn btn-secondary" style={{ fontSize: '0.75rem' }} onClick={() => handleSend(p)}>
+            <Sparkles size={11} /> {p.slice(0, 22)}
           </button>
         ))}
       </div>
 
-      {/* Bottom Input */}
-      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'var(--bg-input)', padding: '8px 14px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
-        <input 
-          type="text" 
-          className="form-input" 
-          placeholder="Ask SmallGPT or enter a Python prompt..." 
-          style={{ border: 'none', background: 'transparent', padding: '6px 0' }}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-        />
-        <button 
-          className="btn btn-primary" 
-          style={{ width: '38px', height: '38px', padding: 0, borderRadius: '50%', flexShrink: 0 }}
-          disabled={loading || !input.trim()}
-          onClick={() => handleSend()}
-        >
-          <Send size={16} />
-        </button>
+      <div style={{ display: 'flex', gap: 10, background: 'var(--bg-input)', padding: 8, borderRadius: 12, border: '1px solid var(--border-subtle)' }}>
+        <input className="form-input" style={{ border: 'none', background: 'transparent' }} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} placeholder="Message the active engine…" />
+        <button className="btn btn-primary" disabled={loading || !input.trim()} onClick={() => handleSend()}><Send size={16} /></button>
       </div>
     </div>
   );

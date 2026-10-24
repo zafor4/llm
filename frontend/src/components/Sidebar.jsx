@@ -1,28 +1,46 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  MessageSquare, 
-  Bot, 
-  Cpu, 
-  Flame, 
-  LineChart, 
+import {
+  LayoutDashboard,
+  MessageSquare,
+  Bot,
+  Cpu,
+  Flame,
+  LineChart,
   Sparkles,
-  Globe
+  Globe,
+  Gauge,
 } from 'lucide-react';
 
 export default function Sidebar({ activeApp, setActiveApp, activeModel, vitals }) {
-  const intelligenceCore = [
-    { id: 'dashboard', label: 'Platform Hub', icon: LayoutDashboard },
-    { id: 'training', label: 'Model Training Studio', icon: Flame },
-    { id: 'models', label: 'Models & Providers', icon: Cpu },
-    { id: 'gateway', label: 'External API Gateway', icon: Globe },
-    { id: 'benchmarks', label: 'System Diagnostics', icon: LineChart },
+  const controlPlane = [
+    { id: 'dashboard', label: 'Control Center', icon: LayoutDashboard },
+    { id: 'models', label: 'Model Catalog', icon: Cpu },
+    { id: 'training', label: 'Training Jobs', icon: Flame },
+    { id: 'resources', label: 'Resources', icon: Gauge },
+    { id: 'gateway', label: 'API Sharing', icon: Globe },
+    { id: 'benchmarks', label: 'Diagnostics', icon: LineChart },
   ];
 
-  const productPlayground = [
-    { id: 'chat', label: 'ChatGPT Studio', icon: MessageSquare },
-    { id: 'agent', label: 'Autonomous Coding Agent', icon: Bot },
+  const playgrounds = [
+    { id: 'chat', label: 'Chat Playground', icon: MessageSquare },
+    { id: 'agent', label: 'Agent Playground', icon: Bot },
   ];
+
+  const renderGroup = (items) =>
+    items.map((item) => {
+      const Icon = item.icon;
+      const isActive = activeApp === item.id;
+      return (
+        <button
+          key={item.id}
+          className={`nav-item ${isActive ? 'active' : ''}`}
+          onClick={() => setActiveApp(item.id)}
+        >
+          <Icon size={18} />
+          <span>{item.label}</span>
+        </button>
+      );
+    });
 
   return (
     <aside className="sidebar">
@@ -31,53 +49,29 @@ export default function Sidebar({ activeApp, setActiveApp, activeModel, vitals }
           <Sparkles size={20} />
         </div>
         <div className="brand-info">
-          <h1>Antigravity AI</h1>
-          <span>House of Intelligence</span>
+          <h1>Intelligence Hub</h1>
+          <span>Control plane</span>
         </div>
       </div>
 
       <nav className="sidebar-nav">
-        <div className="nav-section-title">Intelligence Core</div>
-        {intelligenceCore.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeApp === item.id;
-          return (
-            <button
-              key={item.id}
-              className={`nav-item ${isActive ? 'active' : ''}`}
-              onClick={() => setActiveApp(item.id)}
-            >
-              <Icon size={18} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-
-        <div className="nav-section-title" style={{ marginTop: '1rem' }}>Product Playground</div>
-        {productPlayground.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeApp === item.id;
-          return (
-            <button
-              key={item.id}
-              className={`nav-item ${isActive ? 'active' : ''}`}
-              onClick={() => setActiveApp(item.id)}
-            >
-              <Icon size={18} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
+        <div className="nav-section-title">Control Plane</div>
+        {renderGroup(controlPlane)}
+        <div className="nav-section-title" style={{ marginTop: '1rem' }}>Playgrounds</div>
+        {renderGroup(playgrounds)}
       </nav>
 
       <div className="sidebar-footer">
         <div className="system-pill">
           <span className="pulse-dot"></span>
           <span>
-            {vitals?.cuda_available 
-              ? `${vitals.device_name?.split(' ')[1] || 'GPU'} • ${vitals.vram_used_mb || 0}MB`
+            {vitals?.cuda_available
+              ? `${(vitals.device_name || 'GPU').split(' ').slice(-2).join(' ')} • ${vitals.vram_used_mb || 0}MB`
               : 'CPU Host Active'}
           </span>
+        </div>
+        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 6 }}>
+          Active: {activeModel || 'none'}
         </div>
       </div>
     </aside>

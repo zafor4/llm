@@ -1,310 +1,202 @@
-import React, { useState, useEffect } from 'react';
-import { Cpu, CheckCircle2, RefreshCw, HardDrive, Sparkles, Layers, Key, ArrowRight, Zap, Check } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Cpu, RefreshCw, Zap, Trash2, Flame, Check } from 'lucide-react';
 
-export default function ModelsFleetApp({ activeModel, onSelectModel }) {
+export default function ModelsFleetApp({ activeModel, onSelectModel, onContinueTrain, onRefresh }) {
   const [models, setModels] = useState([]);
-  const [currentLoaded, setCurrentLoaded] = useState(activeModel || '');
-  const [loadingModel, setLoadingModel] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
-  const [notification, setNotification] = useState(null);
+  const [loaded, setLoaded] = useState([]);
+  const [busy, setBusy] = useState('');
+  const [notice, setNotice] = useState(null);
+  const [hfId, setHfId] = useState('Qwen/Qwen2.5-0.5B-Instruct');
+  const [ollamaName, setOllamaName] = useState('qwen2.5:0.5b');
+  const [ollamaHost, setOllamaHost] = useState('http://127.0.0.1:11434');
+  const [ollamaProbe, setOllamaProbe] = useState(null);
 
-  const fetchModels = async () => {
-    setRefreshing(true);
-    try {
-      const res = await fetch('/api/models/list');
-      if (res.ok) {
-        const data = await res.json();
-        setModels(data.models || data.available_models || []);
-        const activeName = data.active_model || data.current_model;
-        if (activeName) {
-          setCurrentLoaded(activeName);
-          if (onSelectModel) onSelectModel(activeName);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch models:', err);
-    } finally {
-      setRefreshing(false);
-    }
+  const loadCatalog = async () => {
+    const res = await fetch('/api/models/list');
+    if (!res.ok) return;
+    const data = await res.json();
+    setModels(data.models || []);
+    setLoaded(data.loaded_models || []);
+    if (data.active_model && onSelectModel) onSelectModel(data.active_model);
   };
 
   useEffect(() => {
-    fetchModels();
+    loadCatalog();
   }, []);
 
-  const handleLoadModel = async (modelName) => {
-    setLoadingModel(modelName);
+  const flash = (type, text) => {
+    setNotice({ type, text });
+    setTimeout(() => setNotice(null), 4000);
+  };
+
+  const post = async (url, body) => {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || data.message || 'Request failed');
+    return data;
+  };
+
+  const handleLoad = async (id) => {
+    setBusy(id);
     try {
-      const res = await fetch('/api/models/load', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model_name: modelName })
-      });
-      const data = await res.json();
-      if (res.ok && data.status === 'success') {
-        setCurrentLoaded(modelName);
-        if (onSelectModel) onSelectModel(modelName);
-        setNotification({ type: 'success', text: `Loaded ${modelName} into GPU memory!` });
-      } else {
-        setNotification({ type: 'error', text: data.message || 'Failed to load model' });
-      }
-    } catch (err) {
-      setNotification({ type: 'error', text: `Error loading model: ${err.message}` });
+      await post('/api/models/load', { model_name: id, activate: true });
+      flash('success', `Loaded ${id}`);
+      await loadCatalog();
+      onRefresh?.();
+    } catch (e) {
+      flash('error', e.message);
     } finally {
-      setLoadingModel('');
-      setTimeout(() => setNotification(null), 4000);
+      setBusy('');
     }
   };
 
-  return (
-    <div className="models-app">
-      <div className="app-header">
-        <div>
-          <h2>Models Fleet & Engine Manager</h2>
-          <p>Deploy, monitor, hot-swap, and orchestrate causal language models in VRAM</p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <button 
-            className="btn btn-secondary" 
-            onClick={fetchModels}
-            disabled={refreshing}
-          >
-            <RefreshCw size={16} className={refreshing ? 'spinning' : ''} />
-            Refresh Checkpoints
-          </button>
-        </div>
-      </div>
+  const handleUnload = async (id) => {
+    try {
+      await post('/api/models/unload', { model_name: id });
+      await loadCatalog();
+      onRefresh?.();
+    } catch (e) {
+      flash('error', e.message);
+    }
+  };
 
-      {notification && (
-        <div className={`notification-banner ${notification.type}`} style={{
-          padding: '0.85rem 1.25rem',
-          borderRadius: '10px',
-          marginBottom: '1.5rem',
-          backgroundColor: notification.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-          border: `1px solid ${notification.type === 'success' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
-          color: notification.type === 'success' ? '#34d399' : '#f87171',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          fontSize: '0.9rem'
-        }}>
-          <CheckCircle2 size={16} />
-          <span>{notification.text}</span>
+  const handleDelete = async (id) => {
+    if (!confirm(`Remove ${id} from the catalog?`)) return;
+    const res = await fetch(`/api/models/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      flash('error', data.detail || 'Delete failed');
+      return;
+    }
+    await loadCatalog();
+    onRefresh?.();
+  };
+
+  const importHF = async () => {
+    setBusy('hf');
+    try {
+      const data = await post('/api/models/import/huggingface', { model_id: hfId, load_now: false });
+      flash('success', `Registered ${data.model.id}. Load it when you want it in VRAM.`);
+      await loadCatalog();
+    } catch (e) {
+      flash('error', e.message);
+    } finally {
+      setBusy('');
+    }
+  };
+
+  const importOllama = async () => {
+    setBusy('ollama');
+    try {
+      const data = await post('/api/models/import/ollama', {
+        model_name: ollamaName,
+        host: ollamaHost,
+        load_now: true,
+      });
+      flash('success', `Ollama model ${data.model.name} is active.`);
+      await loadCatalog();
+      onRefresh?.();
+    } catch (e) {
+      flash('error', e.message);
+    } finally {
+      setBusy('');
+    }
+  };
+
+  const pingOllama = async () => {
+    const res = await fetch(`/api/models/providers/ollama?host=${encodeURIComponent(ollamaHost)}`);
+    setOllamaProbe(await res.json());
+  };
+
+  return (
+    <div>
+      {notice && (
+        <div className="card-panel" style={{ marginBottom: 16, borderColor: notice.type === 'success' ? 'rgba(16,185,129,0.4)' : 'rgba(244,63,94,0.4)' }}>
+          {notice.text}
         </div>
       )}
 
-      {/* Active Model Vitals Card */}
-      <div className="card" style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8))' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-              <span className="badge badge-success">Currently Serving In VRAM</span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Hot Swappable</span>
-            </div>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              {currentLoaded || 'No model loaded'}
-            </h3>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              Requests from Chatbot Studio and Autonomous Coding Agent route directly to this engine.
-            </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+        <p style={{ color: 'var(--text-secondary)' }}>
+          Local checkpoints, Hugging Face imports, and Ollama services. Product apps consume whatever is Active.
+        </p>
+        <button className="btn btn-secondary" onClick={loadCatalog}><RefreshCw size={14} /> Refresh</button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+        <div className="card-panel">
+          <h3 style={{ marginBottom: 10 }}>Import Hugging Face</h3>
+          <input className="form-input" value={hfId} onChange={(e) => setHfId(e.target.value)} placeholder="org/model" />
+          <button className="btn btn-primary" style={{ marginTop: 10 }} disabled={busy === 'hf'} onClick={importHF}>
+            Register model
+          </button>
+        </div>
+        <div className="card-panel">
+          <h3 style={{ marginBottom: 10 }}>Connect Ollama</h3>
+          <input className="form-input" style={{ marginBottom: 8 }} value={ollamaHost} onChange={(e) => setOllamaHost(e.target.value)} />
+          <input className="form-input" value={ollamaName} onChange={(e) => setOllamaName(e.target.value)} placeholder="model:tag" />
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <button className="btn btn-secondary" onClick={pingOllama}>Ping</button>
+            <button className="btn btn-primary" disabled={busy === 'ollama'} onClick={importOllama}>Import & activate</button>
           </div>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Status</div>
-              <div style={{ fontSize: '1rem', fontWeight: 600, color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <span className="pulse-dot" style={{ backgroundColor: '#10b981' }}></span> Live Ready
-              </div>
+          {ollamaProbe && (
+            <div style={{ fontSize: '0.8rem', marginTop: 8, color: ollamaProbe.ok ? '#34d399' : '#f87171' }}>
+              {ollamaProbe.ok ? `Online · ${ (ollamaProbe.models || []).join(', ') || 'no tags' }` : ollamaProbe.error}
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Execution Device</div>
-              <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                NVIDIA CUDA / PyTorch
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Grid of Available Models */}
-      <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <HardDrive size={18} style={{ color: 'var(--accent-primary)' }} />
-        Local Model Checkpoints ({models.length})
-      </h3>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
-        {models.length === 0 ? (
-          <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem' }}>
-            <Cpu size={40} style={{ color: 'var(--text-muted)', margin: '0 auto 1rem' }} />
-            <h4 style={{ color: 'var(--text-primary)' }}>No Checkpoints Detected</h4>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              Train a new model using Training Studio or verify checkpoint files in <code>results/checkpoints/</code>.
-            </p>
-          </div>
-        ) : (
-          models.map((m) => {
-            const isLoaded = currentLoaded === m.name;
-            const isLoading = loadingModel === m.name;
-
-            return (
-              <div 
-                key={m.name} 
-                className="card" 
-                style={{
-                  border: isLoaded ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                  boxShadow: isLoaded ? '0 0 20px rgba(99, 102, 241, 0.2)' : 'none',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
-              >
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
+        {models.map((m) => {
+          const isActive = m.id === activeModel || m.is_active;
+          const isLoaded = m.is_loaded || loaded.some((x) => x.id === m.id);
+          return (
+            <div key={m.id} className="card-panel" style={{ borderColor: isActive ? 'var(--accent-blue)' : undefined }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                    <div>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
-                        {m.name}
-                      </h4>
-                      <span className="badge" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                        {m.checkpoint_type || 'Custom SmallGPT'}
-                      </span>
-                    </div>
-                    {isLoaded && (
-                      <span className="badge badge-success" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                        <Check size={12} /> Active
-                      </span>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', margin: '1rem 0', background: 'rgba(0,0,0,0.2)', padding: '0.85rem', borderRadius: '8px' }}>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Parameters</div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {m.params_formatted || m.params || 'N/A'}
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Tokenizer</div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {m.tokenizer_type || 'BPE-2048'}
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Val Perplexity</div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#34d399' }}>
-                        {m.best_val_ppl ? `${m.best_val_ppl.toFixed(2)}` : '18.42'}
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Checkpoint Size</div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {m.file_size_mb ? `${m.file_size_mb} MB` : '18.2 MB'}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem', wordBreak: 'break-all' }}>
-                    <code>{m.relative_path || m.path || `results/checkpoints/${m.name}.pt`}</code>
-                  </div>
+                  <h4>{m.name}</h4>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{m.type || m.provider}</div>
                 </div>
-
-                <div style={{ marginTop: '0.5rem' }}>
-                  {isLoaded ? (
-                    <button className="btn btn-secondary" style={{ width: '100%', cursor: 'default', opacity: 0.8 }} disabled>
-                      Currently Live in Memory
-                    </button>
-                  ) : (
-                    <button 
-                      className="btn btn-primary" 
-                      style={{ width: '100%' }}
-                      onClick={() => handleLoadModel(m.name)}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <RefreshCw size={14} className="spinning" />
-                          Loading into VRAM...
-                        </>
-                      ) : (
-                        <>
-                          <Zap size={14} />
-                          Load Model into VRAM
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
+                {isActive && <span className="active-model-badge"><Check size={12} /> Active</span>}
               </div>
-            );
-          })
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, margin: '12px 0', fontSize: '0.8rem' }}>
+                <div>Provider<br /><strong>{m.provider}</strong></div>
+                <div>PPL<br /><strong>{m.val_perplexity ?? '—'}</strong></div>
+                <div>Size<br /><strong>{m.file_size_mb ? `${m.file_size_mb} MB` : '—'}</strong></div>
+                <div>State<br /><strong>{isLoaded ? 'In memory' : 'Registered'}</strong></div>
+              </div>
+              {m.notes && <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{m.notes}</p>}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+                {!isLoaded ? (
+                  <button className="btn btn-primary" disabled={busy === m.id} onClick={() => handleLoad(m.id)}>
+                    <Zap size={14} /> Load
+                  </button>
+                ) : (
+                  <button className="btn btn-secondary" onClick={() => handleUnload(m.id)}>Unload</button>
+                )}
+                {m.provider === 'local' && (
+                  <button className="btn btn-secondary" onClick={() => onContinueTrain?.(m.id)}>
+                    <Flame size={14} /> Continue train
+                  </button>
+                )}
+                <button className="btn btn-secondary" onClick={() => handleDelete(m.id)}>
+                  <Trash2 size={14} /> Remove
+                </button>
+              </div>
+            </div>
+          );
+        })}
+        {models.length === 0 && (
+          <div className="card-panel" style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
+            <Cpu size={36} style={{ opacity: 0.4 }} />
+            <p>No models in the catalog. Train one or import Hugging Face / Ollama.</p>
+          </div>
         )}
-      </div>
-
-      {/* External Model Provider Gateways */}
-      <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <Layers size={18} style={{ color: 'var(--accent-secondary)' }} />
-        External Provider Gateways & Connectors
-      </h3>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <h4 style={{ fontWeight: 600 }}>Ollama Local Engine</h4>
-            <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#34d399' }}>Available</span>
-          </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-            Bridge local quantized Llama 3, Mistral, or Qwen instances directly into this agent harness via localhost:11434.
-          </p>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input 
-              type="text" 
-              className="input-field" 
-              defaultValue="http://127.0.0.1:11434" 
-              readOnly 
-              style={{ fontSize: '0.8rem' }}
-            />
-            <button className="btn btn-secondary" style={{ whiteSpace: 'nowrap', fontSize: '0.8rem' }}>Ping</button>
-          </div>
-        </div>
-
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <h4 style={{ fontWeight: 600 }}>Hugging Face Hub</h4>
-            <span className="badge" style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)', color: '#818cf8' }}>Connected</span>
-          </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-            Direct weights export and tokenizer sync to Hugging Face Model Hub repositories for academic sharing.
-          </p>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input 
-              type="password" 
-              className="input-field" 
-              placeholder="hf_..." 
-              defaultValue="hf_active_token_auth"
-              readOnly 
-              style={{ fontSize: '0.8rem' }}
-            />
-            <button className="btn btn-secondary" style={{ whiteSpace: 'nowrap', fontSize: '0.8rem' }}>Sync</button>
-          </div>
-        </div>
-
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <h4 style={{ fontWeight: 600 }}>OpenAI Compatibility API</h4>
-            <span className="badge badge-success">Port 8000</span>
-          </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-            FastAPI exposes standard <code>/v1/chat/completions</code> endpoints so external apps can treat this engine as an OpenAI drop-in.
-          </p>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input 
-              type="text" 
-              className="input-field" 
-              defaultValue="http://127.0.0.1:8000/api/chat/generate" 
-              readOnly 
-              style={{ fontSize: '0.8rem' }}
-            />
-            <button className="btn btn-secondary" style={{ whiteSpace: 'nowrap', fontSize: '0.8rem' }}>Copy</button>
-          </div>
-        </div>
       </div>
     </div>
   );

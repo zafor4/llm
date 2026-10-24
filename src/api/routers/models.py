@@ -1,118 +1,84 @@
-"""Models router for managing local SmallGPT checkpoints and external providers."""
+"""Model catalog, import, load/unload, activate, and metadata."""
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-import torch
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from typing import List, Optional
 
-from src.data.tokenizer import BPETokenizerWrapper
-from src.model.config import GPTConfig
-from src.model.transformer import SmallGPT
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+
+from src.hub.activity import log_event
+from src.hub.providers import ollama_ping
+from src.hub.registry import get_model, list_models as catalog_list, remove_model, update_model
+from src.hub.runtime import (
+    active_model_id,
+    load_model,
+    loaded_models,
+    register_huggingface,
+    register_ollama,
+    set_active,
+    unload,
+)
 
 router = APIRouter(prefix="/api/models", tags=["Models"])
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-# In-memory model singletons
-ACTIVE_MODEL_NAME = "GPT-Mini-256"
-ACTIVE_MODEL: Optional[SmallGPT] = None
-ACTIVE_TOKENIZER: Optional[BPETokenizerWrapper] = None
 
 
 class LoadModelRequest(BaseModel):
     model_name: str
+    activate: bool = True
 
 
-def load_checkpoint(model_name: str) -> bool:
-    global ACTIVE_MODEL, ACTIVE_TOKENIZER, ACTIVE_MODEL_NAME
-    ckpt_path = PROJECT_ROOT / "results" / "checkpoints" / model_name / "best_model.pt"
-    if not ckpt_path.exists():
-        ckpt_path = PROJECT_ROOT / "results" / "checkpoints" / model_name / "final_model.pt"
-
-    tok_path = PROJECT_ROOT / "results" / "bpe_500.json"
-    if not ckpt_path.exists() or not tok_path.exists():
-        return False
-
-    try:
-        tokenizer = BPETokenizerWrapper.load(tok_path)
-        checkpoint = torch.load(ckpt_path, map_location=DEVICE, weights_only=False)
-        config = GPTConfig.from_dict(checkpoint["config"])
-        model = SmallGPT(config).to(DEVICE)
-        model.load_state_dict(checkpoint["model_state_dict"])
-        model.eval()
-
-        ACTIVE_MODEL = model
-        ACTIVE_TOKENIZER = tokenizer
-        ACTIVE_MODEL_NAME = model_name
-        return True
-    except Exception as e:
-        print(f"Error loading model {model_name}: {e}")
-        return False
+class ImportHFRequest(BaseModel):
+    model_id: str = Field(..., description="Hugging Face repo id, e.g. Qwen/Qwen2.5-0.5B-Instruct")
+    name: Optional[str] = None
+    load_now: bool = False
 
 
-# Initial boot load
-load_checkpoint(ACTIVE_MODEL_NAME)
+class ImportOllamaRequest(BaseModel):
+    model_name: str
+    host: str = "http://127.0.0.1:11434"
+    load_now: bool = True
+
+
+class UpdateModelRequest(BaseModel):
+    name: Optional[str] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+def _public_catalog():
+    loaded = {m["id"] for m in loaded_models()}
+    active = active_model_id()
+    models = []
+    for rec in catalog_list():
+        item = dict(rec)
+        item["is_active"] = rec["id"] == active
+        item["is_loaded"] = rec["id"] in loaded
+        item["type"] = {
+            "local": "Local SmallGPT Checkpoint",
+            "huggingface": "Hugging Face Causal LM",
+            "ollama": "Ollama Local Service",
+        }.get(rec.get("provider"), rec.get("kind"))
+        item["val_perplexity"] = (rec.get("metrics") or {}).get("val_perplexity")
+        item["file_size_mb"] = (rec.get("metrics") or {}).get("file_size_mb")
+        item["params_formatted"] = rec.get("params_formatted")
+        item["tokenizer_type"] = "BPE-500" if rec.get("provider") == "local" else rec.get("provider")
+        item["best_val_ppl"] = item["val_perplexity"]
+        item["checkpoint_type"] = item["type"]
+        models.append(item)
+    return models
 
 
 @router.get("")
 @router.get("/")
 @router.get("/list")
 def list_models():
-    """List all available local checkpoints and providers."""
-    checkpoints_dir = PROJECT_ROOT / "results" / "checkpoints"
-    models = []
-
-    if checkpoints_dir.exists():
-        for d in sorted(checkpoints_dir.iterdir()):
-            if d.is_dir() and ((d / "best_model.pt").exists() or (d / "final_model.pt").exists()):
-                val_ppl = "N/A"
-                hist_file = d / "training_history.json"
-                if hist_file.exists():
-                    try:
-                        h = json.loads(hist_file.read_text())
-                        if h:
-                            val_ppl = f"{h[-1].get('val_perplexity', 'N/A')}"
-                    except Exception:
-                        pass
-
-                models.append({
-                    "id": d.name,
-                    "name": d.name,
-                    "type": "Local SmallGPT Checkpoint",
-                    "provider": "PyTorch (Local)",
-                    "val_perplexity": val_ppl,
-                    "is_active": d.name == ACTIVE_MODEL_NAME,
-                    "device": DEVICE,
-                })
-
-    # Connected Provider slots
-    models.append({
-        "id": "qwen2.5-0.5b",
-        "name": "Qwen2.5-0.5B-Instruct",
-        "type": "Pretrained Causal LM",
-        "provider": "Hugging Face",
-        "val_perplexity": "N/A",
-        "is_active": False,
-        "device": DEVICE,
-    })
-    models.append({
-        "id": "ollama-local",
-        "name": "Ollama Local Service",
-        "type": "Local API Service (port 11434)",
-        "provider": "Ollama",
-        "val_perplexity": "N/A",
-        "is_active": False,
-        "device": "Localhost",
-    })
-
+    models = _public_catalog()
     return {
         "status": "success",
-        "active_model": ACTIVE_MODEL_NAME,
-        "current_model": ACTIVE_MODEL_NAME,
+        "active_model": active_model_id(),
+        "current_model": active_model_id(),
+        "loaded_models": loaded_models(),
         "models": models,
         "available_models": models,
     }
@@ -120,8 +86,84 @@ def list_models():
 
 @router.post("/load")
 def switch_model(req: LoadModelRequest):
-    """Switch active inference model."""
-    success = load_checkpoint(req.model_name)
-    if not success:
-        raise HTTPException(status_code=400, detail=f"Failed to load checkpoint '{req.model_name}'")
-    return {"success": True, "active_model": ACTIVE_MODEL_NAME}
+    try:
+        slot = load_model(req.model_name, activate=req.activate)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {
+        "success": True,
+        "status": "success",
+        "message": f"Loaded {req.model_name}",
+        "active_model": active_model_id(),
+        "loaded": slot.public(),
+    }
+
+
+@router.post("/unload")
+def unload_model(req: LoadModelRequest):
+    ok = unload(req.model_name)
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"'{req.model_name}' is not loaded.")
+    return {"success": True, "status": "success", "active_model": active_model_id()}
+
+
+@router.post("/activate")
+def activate_model(req: LoadModelRequest):
+    try:
+        set_active(req.model_name)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"success": True, "status": "success", "active_model": active_model_id()}
+
+
+@router.post("/import/huggingface")
+def import_huggingface(req: ImportHFRequest):
+    record = register_huggingface(req.model_id, req.name)
+    loaded = None
+    if req.load_now:
+        try:
+            loaded = load_model(record["id"]).public()
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=f"Registered but load failed: {exc}") from exc
+    return {"success": True, "status": "success", "model": record, "loaded": loaded}
+
+
+@router.post("/import/ollama")
+def import_ollama(req: ImportOllamaRequest):
+    ping = ollama_ping(req.host)
+    if not ping.get("ok"):
+        raise HTTPException(status_code=400, detail=f"Ollama not reachable at {req.host}: {ping.get('error')}")
+    if ping.get("models") and req.model_name not in ping["models"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Model '{req.model_name}' not in Ollama. Available: {ping['models']}",
+        )
+    record = register_ollama(req.model_name, req.host)
+    loaded = load_model(record["id"]).public() if req.load_now else None
+    return {"success": True, "status": "success", "model": record, "loaded": loaded, "ping": ping}
+
+
+@router.get("/providers/ollama")
+def probe_ollama(host: str = "http://127.0.0.1:11434"):
+    return ollama_ping(host)
+
+
+@router.patch("/{model_id}")
+def patch_model(model_id: str, req: UpdateModelRequest):
+    rec = update_model(model_id, req.model_dump(exclude_none=True))
+    if rec is None:
+        raise HTTPException(status_code=404, detail="Model not found")
+    return {"success": True, "model": rec}
+
+
+@router.delete("/{model_id}")
+def delete_model(model_id: str, delete_files: bool = False):
+    if get_model(model_id) is None:
+        raise HTTPException(status_code=404, detail="Model not found")
+    if model_id in {m["id"] for m in loaded_models()}:
+        unload(model_id)
+    ok = remove_model(model_id, delete_files=delete_files)
+    if not ok:
+        raise HTTPException(status_code=400, detail="Could not remove model")
+    log_event("registry", f"Deleted catalog entry {model_id}")
+    return {"success": True}

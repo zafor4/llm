@@ -1,0 +1,114 @@
+[
+  {
+    "id": "997ca6cd0ac8",
+    "ts": 1792845389.791169,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Registered model 'demo-ollama' (ollama)",
+    "meta": {
+      "id": "demo-ollama"
+    }
+  },
+  {
+    "id": "893ab7801cfa",
+    "ts": 1792845389.79417,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed model 'demo-ollama'",
+    "meta": {
+      "id": "demo-ollama",
+      "deleted_files": false
+    }
+  },
+  {
+    "id": "efdfa2155f3c",
+    "ts": 1792845431.041302,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Registered model 'demo-ollama' (ollama)",
+    "meta": {
+      "id": "demo-ollama"
+    }
+  },
+  {
+    "id": "f815913093af",
+    "ts": 1792845431.04378,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed model 'demo-ollama'",
+    "meta": {
+      "id": "demo-ollama",
+      "deleted_files": false
+    }
+  },
+  {
+    "id": "647773b292ec",
+    "ts": 1792845645.0303462,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "33d63e1db87f",
+    "ts": 1792845645.0313504,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "275c136fbcde",
+    "ts": 1792845645.0323503,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "e5750276d903",
+    "ts": 1792845781.783955,
+    "kind": "chat",
+    "level": "info",
+    "source": "hub",
+    "message": "Completion via GPT-Mini-256",
+    "meta": {
+      "latency": 0.852
+    }
+  },
+  {
+    "id": "5ad141a8dea3",
+    "ts": 1792857331.3043404,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Registered model 'demo-ollama' (ollama)",
+    "meta": {
+      "id": "demo-ollama"
+    }
+  },
+  {
+    "id": "36d8dc1e764d",
+    "ts": 1792857331.307346,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed model 'demo-ollama'",
+    "meta": {
+      "id": "demo-ollama",
+      "deleted_files": false
+    }
+  }
+]

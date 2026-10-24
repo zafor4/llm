@@ -20,21 +20,19 @@ export default function BenchmarksApp() {
   const [testResults, setTestResults] = useState(null);
   const [isRunningTests, setIsRunningTests] = useState(false);
   const [activeTab, setActiveTab] = useState('models');
+  const [lmRows, setLmRows] = useState([]);
+  const [agentRows, setAgentRows] = useState([]);
 
-  const benchmarkData = [
-    { model: 'GPT-Micro-128', params: '1.24M', layers: 4, heads: 4, dim: 128, tokenizer: 'BPE-500', trainLoss: 2.14, valLoss: 2.68, ppl: 14.58, throughput: '14.2k tok/s' },
-    { model: 'GPT-Mini-256', params: '4.85M', layers: 6, heads: 8, dim: 256, tokenizer: 'BPE-2048', trainLoss: 1.82, valLoss: 2.31, ppl: 10.07, throughput: '9.8k tok/s' },
-    { model: 'GPT-Small-256', params: '8.42M', layers: 8, heads: 8, dim: 256, tokenizer: 'BPE-2048', trainLoss: 1.69, valLoss: 2.18, ppl: 8.84, throughput: '7.1k tok/s' },
-    { model: 'GPT-Mini-512', params: '19.2M', layers: 6, heads: 8, dim: 512, tokenizer: 'BPE-2048', trainLoss: 1.48, valLoss: 1.95, ppl: 7.03, throughput: '4.5k tok/s' },
-  ];
-
-  const agentBenchmarks = [
-    { task: 'TASK-01: Multi-Step Arithmetic (Tool Call)', baselineAccuracy: '12%', agentAccuracy: '100%', speed: '1.1s', status: 'VERIFIED' },
-    { task: 'TASK-02: Algorithmic File Refactoring', baselineAccuracy: '28%', agentAccuracy: '94%', speed: '2.4s', status: 'VERIFIED' },
-    { task: 'TASK-03: Bug Detection & Autonomous Patching', baselineAccuracy: '19%', agentAccuracy: '91%', speed: '3.0s', status: 'VERIFIED' },
-    { task: 'TASK-04: Test Suite Generation & Pytest Loop', baselineAccuracy: '8%', agentAccuracy: '89%', speed: '3.8s', status: 'VERIFIED' },
-    { task: 'TASK-05: System Diagnostic & Self-Correction', baselineAccuracy: '0%', agentAccuracy: '86%', speed: '4.2s', status: 'VERIFIED' },
-  ];
+  useEffect(() => {
+    fetch('/api/benchmarks/scaling-experiments')
+      .then((r) => (r.ok ? r.json() : { lm_experiments: [] }))
+      .then((d) => setLmRows(d.lm_experiments || []))
+      .catch(() => {});
+    fetch('/api/benchmarks/results')
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows) => setAgentRows(Array.isArray(rows) ? rows : []))
+      .catch(() => {});
+  }, []);
 
   const runPytestSuite = async () => {
     setIsRunningTests(true);
@@ -90,7 +88,7 @@ export default function BenchmarksApp() {
           onClick={() => setActiveTab('tests')}
           style={{ fontSize: '0.875rem' }}
         >
-          Automated Test Suite (16/16)
+          Automated Test Suite
         </button>
         <button 
           className={`btn ${activeTab === 'docs' ? 'btn-primary' : 'btn-secondary'}`}
@@ -126,18 +124,18 @@ export default function BenchmarksApp() {
                   </tr>
                 </thead>
                 <tbody>
-                  {benchmarkData.map((row, i) => (
+                  {lmRows.map((row, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                      <td style={{ padding: '0.75rem', fontWeight: 600, color: 'var(--accent-primary)' }}>{row.model}</td>
-                      <td style={{ padding: '0.75rem' }}>{row.params}</td>
-                      <td style={{ padding: '0.75rem' }}>{row.layers}L / {row.heads}H / {row.dim}D</td>
+                      <td style={{ padding: '0.75rem', fontWeight: 600, color: 'var(--accent-primary)' }}>{row.model_name}</td>
+                      <td style={{ padding: '0.75rem' }}>{row.total_params?.toLocaleString?.() || row.total_params}</td>
+                      <td style={{ padding: '0.75rem' }}>{row.n_layer}L / {row.n_head}H / {row.n_embd}D</td>
                       <td style={{ padding: '0.75rem' }}>
-                        <span className="badge" style={{ backgroundColor: 'rgba(255,255,255,0.05)', fontSize: '0.75rem' }}>{row.tokenizer}</span>
+                        <span className="badge" style={{ backgroundColor: 'rgba(255,255,255,0.05)', fontSize: '0.75rem' }}>BPE-500</span>
                       </td>
-                      <td style={{ padding: '0.75rem' }}>{row.trainLoss}</td>
-                      <td style={{ padding: '0.75rem' }}>{row.valLoss}</td>
-                      <td style={{ padding: '0.75rem', fontWeight: 600, color: '#34d399' }}>{row.ppl}</td>
-                      <td style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>{row.throughput}</td>
+                      <td style={{ padding: '0.75rem' }}>—</td>
+                      <td style={{ padding: '0.75rem' }}>{row.val_loss}</td>
+                      <td style={{ padding: '0.75rem', fontWeight: 600, color: '#34d399' }}>{row.val_perplexity}</td>
+                      <td style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>{Math.round(row.tokens_per_sec || 0)} tok/s</td>
                     </tr>
                   ))}
                 </tbody>
@@ -193,22 +191,22 @@ export default function BenchmarksApp() {
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
-                    <th style={{ padding: '0.75rem' }}>Benchmark Task ID</th>
-                    <th style={{ padding: '0.75rem' }}>Standard Single-Turn LLM</th>
-                    <th style={{ padding: '0.75rem' }}>Antigravity Coding Agent</th>
-                    <th style={{ padding: '0.75rem' }}>Mean Latency</th>
-                    <th style={{ padding: '0.75rem' }}>State</th>
+                    <th style={{ padding: '0.75rem' }}>Task · Mode</th>
+                    <th style={{ padding: '0.75rem' }}>Success</th>
+                    <th style={{ padding: '0.75rem' }}>Steps</th>
+                    <th style={{ padding: '0.75rem' }}>Latency</th>
+                    <th style={{ padding: '0.75rem' }}>Category</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {agentBenchmarks.map((b, i) => (
+                  {agentRows.map((b, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                      <td style={{ padding: '0.75rem', fontWeight: 600 }}>{b.task}</td>
-                      <td style={{ padding: '0.75rem', color: '#f87171' }}>{b.baselineAccuracy}</td>
-                      <td style={{ padding: '0.75rem', color: '#34d399', fontWeight: 700 }}>{b.agentAccuracy}</td>
-                      <td style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>{b.speed}</td>
+                      <td style={{ padding: '0.75rem', fontWeight: 600 }}>{b.task_id} · {b.agent_mode}</td>
+                      <td style={{ padding: '0.75rem', color: b.success ? '#34d399' : '#f87171' }}>{String(b.success)}</td>
+                      <td style={{ padding: '0.75rem', color: '#34d399', fontWeight: 700 }}>{b.steps_taken}</td>
+                      <td style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>{b.latency_sec}s</td>
                       <td style={{ padding: '0.75rem' }}>
-                        <span className="badge badge-success">{b.status}</span>
+                        <span className="badge badge-success">{b.category}</span>
                       </td>
                     </tr>
                   ))}
@@ -260,10 +258,10 @@ export default function BenchmarksApp() {
             {testResults ? (
               <div>
                 <div style={{ marginBottom: '0.75rem', color: testResults.exit_code === 0 ? '#34d399' : '#f87171', fontWeight: 600 }}>
-                  {testResults.exit_code === 0 ? 'STATUS: ALL 16 TESTS PASSED (100% HEALTHY)' : 'STATUS: FAILED'}
+                  {testResults.exit_code === 0 ? 'STATUS: ALL TESTS PASSED' : 'STATUS: FAILED'}
                 </div>
                 <pre style={{ whiteSpace: 'pre-wrap', color: 'var(--text-primary)', maxHeight: '380px', overflowY: 'auto' }}>
-                  {testResults.stdout || testResults.log || 'No output recorded.'}
+                  {testResults.output || testResults.stdout || testResults.log || 'No output recorded.'}
                 </pre>
               </div>
             ) : (

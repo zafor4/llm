@@ -1,14 +1,14 @@
-"""Chat router for conversational AI and direct text generation."""
+"""Playground and product chat completions via the hub runtime."""
 
 from __future__ import annotations
 
-import time
-import torch
-from fastapi import APIRouter
-from pydantic import BaseModel, Field
 from typing import List, Optional
 
-from src.api.routers.models import ACTIVE_MODEL, ACTIVE_TOKENIZER, ACTIVE_MODEL_NAME, DEVICE
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+
+from src.hub.activity import log_event
+from src.hub.runtime import active_model_id, format_chat_prompt, generate_text
 
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
 
@@ -25,46 +25,43 @@ class ChatRequest(BaseModel):
     top_p: float = 0.9
     max_tokens: int = 64
     system_prompt: Optional[str] = None
+    model: Optional[str] = None
 
 
 @router.post("")
+@router.post("/generate")
 def generate_chat_response(req: ChatRequest):
-    """Generate conversational response using active SmallGPT model."""
-    start_time = time.time()
-    
-    if ACTIVE_MODEL is None or ACTIVE_TOKENIZER is None:
+    if not (req.model or active_model_id()):
         return {
             "role": "assistant",
-            "content": "No active SmallGPT model checkpoint is currently loaded. Please load a checkpoint from the Models Manager.",
+            "content": "No model is loaded. Open Models, load a checkpoint or import a provider, then retry.",
             "latency_sec": 0.0,
             "tokens_generated": 0,
-            "model_used": ACTIVE_MODEL_NAME,
+            "model_used": None,
         }
 
-    # Format conversational prompt
-    prompt = f"# User: {req.message.strip()}\n# Assistant:\n"
-    tokens = ACTIVE_TOKENIZER.encode(prompt)
-    idx = torch.tensor([tokens], dtype=torch.long, device=DEVICE)
-
-    with torch.no_grad():
-        out_tokens = ACTIVE_MODEL.generate(
-            idx,
-            max_new_tokens=req.max_tokens,
+    prompt = format_chat_prompt(
+        req.message,
+        history=[m.model_dump() for m in (req.history or [])],
+        system_prompt=req.system_prompt,
+    )
+    try:
+        result = generate_text(
+            prompt,
+            model_id=req.model,
+            max_tokens=req.max_tokens,
             temperature=req.temperature,
             top_p=req.top_p,
         )
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    full_output = ACTIVE_TOKENIZER.decode(out_tokens[0].tolist())
-    continuation = full_output[len(prompt):].strip()
-    if not continuation:
-        continuation = full_output.strip()
-
-    elapsed = time.time() - start_time
-
+    log_event("chat", f"Completion via {result['model']}", meta={"latency": result["latency_sec"]})
     return {
         "role": "assistant",
-        "content": continuation,
-        "latency_sec": round(elapsed, 3),
-        "tokens_generated": req.max_tokens,
-        "model_used": ACTIVE_MODEL_NAME,
+        "content": result["text"],
+        "latency_sec": result["latency_sec"],
+        "tokens_generated": result["tokens_requested"],
+        "model_used": result["model"],
+        "provider": result["provider"],
     }

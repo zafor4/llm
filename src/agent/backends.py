@@ -121,29 +121,62 @@ class PretrainedHuggingFaceLLM(BaseAgentLLM):
             pad_token_id=self.pipeline.tokenizer.eos_token_id,
         )
         gen_text = outputs[0]["generated_text"][len(prompt) :].strip()
-        return self._parse_json_response(gen_text)
+        return parse_agent_json(gen_text)
 
-    def _parse_json_response(self, text: str) -> AgentDecision:
-        # Extract json markdown if wrapped in ```json ... ```
-        json_match = re.search(r"\{.*\}", text, re.DOTALL)
-        if json_match:
-            try:
-                data = json.loads(json_match.group(0))
-                return AgentDecision(
-                    thought=data.get("thought", "Proceeding with selected action."),
-                    tool_name=data.get("tool", ""),
-                    tool_params=data.get("params", {}),
-                    is_finish=data.get("is_finish", False),
-                    final_answer=data.get("final_answer"),
-                )
-            except json.JSONDecodeError:
-                pass
 
-        # Fallback if invalid JSON
-        return AgentDecision(
-            thought=f"Failed to generate valid JSON: {text[:100]}",
-            tool_name="",
-            tool_params={},
-            is_finish=True,
-            final_answer=f"Execution halted due to formatting error: {text}",
+def parse_agent_json(text: str) -> AgentDecision:
+    json_match = re.search(r"\{.*\}", text, re.DOTALL)
+    if json_match:
+        try:
+            data = json.loads(json_match.group(0))
+            return AgentDecision(
+                thought=data.get("thought", "Proceeding with selected action."),
+                tool_name=data.get("tool", ""),
+                tool_params=data.get("params", {}),
+                is_finish=data.get("is_finish", False),
+                final_answer=data.get("final_answer"),
+            )
+        except json.JSONDecodeError:
+            pass
+
+    return AgentDecision(
+        thought=f"Failed to generate valid JSON: {text[:100]}",
+        tool_name="",
+        tool_params={},
+        is_finish=True,
+        final_answer=f"Execution halted due to formatting error: {text}",
+    )
+
+
+class HubRuntimePlanner(BaseAgentLLM):
+    """Plans the next tool call using any loaded hub engine (HF, Ollama, or SmallGPT)."""
+
+    def __init__(self, model_id: Optional[str] = None):
+        self.model_id = model_id
+
+    def plan_step(
+        self,
+        state: TaskState,
+        tool_schemas: List[Dict[str, Any]],
+        system_prompt: str,
+    ) -> AgentDecision:
+        from src.hub.runtime import generate_text
+
+        context = state.get_context_summary()
+        tools_str = json.dumps(tool_schemas, indent=2)
+        prompt = (
+            f"{system_prompt}\n\n"
+            f"Available tools:\n{tools_str}\n\n"
+            "Respond ONLY with a JSON object:\n"
+            '{"thought":"...","tool":"tool_name","params":{},"is_finish":false,"final_answer":null}\n\n'
+            f"Current task state:\n{context}\n\n"
+            "Next action JSON:"
         )
+        result = generate_text(
+            prompt,
+            model_id=self.model_id,
+            max_tokens=256,
+            temperature=0.2,
+            top_p=0.9,
+        )
+        return parse_agent_json(result["text"])

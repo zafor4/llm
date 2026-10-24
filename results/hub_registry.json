@@ -1,0 +1,150 @@
+{
+  "models": {
+    "Custom-GPT-Micro": {
+      "id": "Custom-GPT-Micro",
+      "name": "Custom-GPT-Micro",
+      "provider": "local",
+      "kind": "smallgpt",
+      "status": "ready",
+      "capabilities": [
+        "chat",
+        "complete",
+        "finetune"
+      ],
+      "device_hint": "local-weights",
+      "origin": "Custom-GPT-Micro",
+      "notes": "",
+      "tags": [
+        "local",
+        "smallgpt"
+      ],
+      "metrics": {
+        "val_perplexity": 14.780208783741472,
+        "last_step": 100,
+        "file_size_mb": 7.27
+      },
+      "path": "C:\\Users\\CSE-TECH-04\\Desktop\\zafor\\projects\\llm\\results\\checkpoints\\Custom-GPT-Micro",
+      "relative_path": "results/checkpoints/Custom-GPT-Micro",
+      "weight_file": "best_model.pt",
+      "updated_at": 1792839096.6010404,
+      "created_at": 1792845644.7243712
+    },
+    "GPT-Micro-128": {
+      "id": "GPT-Micro-128",
+      "name": "GPT-Micro-128",
+      "provider": "local",
+      "kind": "smallgpt",
+      "status": "ready",
+      "capabilities": [
+        "chat",
+        "complete",
+        "finetune"
+      ],
+      "device_hint": "local-weights",
+      "origin": "GPT-Micro-128",
+      "notes": "",
+      "tags": [
+        "local",
+        "smallgpt"
+      ],
+      "metrics": {
+        "val_perplexity": 1.8880953490141201,
+        "last_step": 300,
+        "file_size_mb": 7.27
+      },
+      "path": "C:\\Users\\CSE-TECH-04\\Desktop\\zafor\\projects\\llm\\results\\checkpoints\\GPT-Micro-128",
+      "relative_path": "results/checkpoints/GPT-Micro-128",
+      "weight_file": "best_model.pt",
+      "updated_at": 1792325505.819839,
+      "created_at": 1792845644.7243712
+    },
+    "GPT-Mini-256": {
+      "id": "GPT-Mini-256",
+      "name": "GPT-Mini-256",
+      "provider": "local",
+      "kind": "smallgpt",
+      "status": "ready",
+      "capabilities": [
+        "chat",
+        "complete",
+        "finetune"
+      ],
+      "device_hint": "local-weights",
+      "origin": "GPT-Mini-256",
+      "notes": "",
+      "tags": [
+        "local",
+        "smallgpt"
+      ],
+      "metrics": {
+        "val_perplexity": 1.1542475568398678,
+        "last_step": 300,
+        "file_size_mb": 23.73
+      },
+      "path": "C:\\Users\\CSE-TECH-04\\Desktop\\zafor\\projects\\llm\\results\\checkpoints\\GPT-Mini-256",
+      "relative_path": "results/checkpoints/GPT-Mini-256",
+      "weight_file": "best_model.pt",
+      "updated_at": 1792325518.3475773,
+      "created_at": 1792845644.7243712
+    },
+    "GPT-Mini-512": {
+      "id": "GPT-Mini-512",
+      "name": "GPT-Mini-512",
+      "provider": "local",
+      "kind": "smallgpt",
+      "status": "ready",
+      "capabilities": [
+        "chat",
+        "complete",
+        "finetune"
+      ],
+      "device_hint": "local-weights",
+      "origin": "GPT-Mini-512",
+      "notes": "",
+      "tags": [
+        "local",
+        "smallgpt"
+      ],
+      "metrics": {
+        "val_perplexity": 1.1483947923991369,
+        "last_step": 300,
+        "file_size_mb": 24.01
+      },
+      "path": "C:\\Users\\CSE-TECH-04\\Desktop\\zafor\\projects\\llm\\results\\checkpoints\\GPT-Mini-512",
+      "relative_path": "results/checkpoints/GPT-Mini-512",
+      "weight_file": "best_model.pt",
+      "updated_at": 1792325564.738496,
+      "created_at": 1792845644.7243712
+    },
+    "GPT-Small-256": {
+      "id": "GPT-Small-256",
+      "name": "GPT-Small-256",
+      "provider": "local",
+      "kind": "smallgpt",
+      "status": "ready",
+      "capabilities": [
+        "chat",
+        "complete",
+        "finetune"
+      ],
+      "device_hint": "local-weights",
+      "origin": "GPT-Small-256",
+      "notes": "",
+      "tags": [
+        "local",
+        "smallgpt"
+      ],
+      "metrics": {
+        "val_perplexity": 1.101642512723865,
+        "last_step": 300,
+        "file_size_mb": 55.3
+      },
+      "path": "C:\\Users\\CSE-TECH-04\\Desktop\\zafor\\projects\\llm\\results\\checkpoints\\GPT-Small-256",
+      "relative_path": "results/checkpoints/GPT-Small-256",
+      "weight_file": "best_model.pt",
+      "updated_at": 1792325540.4459407,
+      "created_at": 1792845644.7243712
+    }
+  },
+  "updated_at": 1792857397.0815613
+}
