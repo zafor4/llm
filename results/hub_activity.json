@@ -141,5 +141,318 @@
     "source": "hub",
     "message": "Control plane online. Active model: GPT-Mini-256",
     "meta": {}
+  },
+  {
+    "id": "d314ac96b321",
+    "ts": 1792858658.5089593,
+    "kind": "training",
+    "level": "info",
+    "source": "hub",
+    "message": "Started scratch job for 'My-First-Model'",
+    "meta": {
+      "job_id": "job-1792858658"
+    }
+  },
+  {
+    "id": "1bb099fb7311",
+    "ts": 1792858662.8241043,
+    "kind": "training",
+    "level": "info",
+    "source": "hub",
+    "message": "Job COMPLETED for 'My-First-Model'",
+    "meta": {
+      "job_id": "job-1792858658"
+    }
+  },
+  {
+    "id": "d9ce6d5cc013",
+    "ts": 1792858671.7977545,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'My-First-Model'",
+    "meta": {
+      "id": "My-First-Model"
+    }
+  },
+  {
+    "id": "7c88ea542fe3",
+    "ts": 1792858671.7998533,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'My-First-Model' (local)",
+    "meta": {
+      "id": "My-First-Model",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "7dd984c4ebd4",
+    "ts": 1792858680.057486,
+    "kind": "chat",
+    "level": "info",
+    "source": "hub",
+    "message": "Completion via My-First-Model",
+    "meta": {
+      "latency": 0.738
+    }
+  },
+  {
+    "id": "bf09f3891b2e",
+    "ts": 1792858693.3554125,
+    "kind": "agent",
+    "level": "info",
+    "source": "hub",
+    "message": "Agent run TASK_01 via oracle: PASSED",
+    "meta": {
+      "steps": 5,
+      "planner": "oracle"
+    }
+  },
+  {
+    "id": "93a6bbe45024",
+    "ts": 1792858983.1916294,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Registered model 'demo-ollama' (ollama)",
+    "meta": {
+      "id": "demo-ollama"
+    }
+  },
+  {
+    "id": "504c3036a330",
+    "ts": 1792858983.1942284,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed model 'demo-ollama'",
+    "meta": {
+      "id": "demo-ollama",
+      "deleted_files": false
+    }
+  },
+  {
+    "id": "f05550e14e5f",
+    "ts": 1792858987.8941855,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "32be246e24a5",
+    "ts": 1792858987.8951924,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "2e452d6eb091",
+    "ts": 1792858987.8972526,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "1c2e49838eeb",
+    "ts": 1792859263.5057054,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "b917ee92ca2b",
+    "ts": 1792859263.5067062,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "403beefaeb71",
+    "ts": 1792859263.5077066,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "9c7cc43cb016",
+    "ts": 1792859807.451215,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'support-chats' (2 samples)",
+    "meta": {
+      "id": "support-chats"
+    }
+  },
+  {
+    "id": "bf3116549e7e",
+    "ts": 1792859807.458913,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'builtin-code-algorithms' (600 samples)",
+    "meta": {
+      "id": "builtin-code-algorithms"
+    }
+  },
+  {
+    "id": "700f417b3476",
+    "ts": 1792859807.466599,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed dataset 'support-chats'",
+    "meta": {
+      "id": "support-chats"
+    }
+  },
+  {
+    "id": "5bc0164cfa2b",
+    "ts": 1792859807.476104,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'mixed-folder' from path",
+    "meta": {
+      "id": "mixed-folder",
+      "origin": "C:\\Users\\CSE-TECH-04\\AppData\\Local\\Temp\\pytest-of-CSE-TECH-04\\pytest-13\\test_include_from_path_folder0\\incoming"
+    }
+  },
+  {
+    "id": "3012a2454695",
+    "ts": 1792859807.4832182,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'builtin-code-algorithms' (600 samples)",
+    "meta": {
+      "id": "builtin-code-algorithms"
+    }
+  },
+  {
+    "id": "a2aad4238e55",
+    "ts": 1792859807.4912407,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Registered model 'demo-ollama' (ollama)",
+    "meta": {
+      "id": "demo-ollama"
+    }
+  },
+  {
+    "id": "02e22e3c834e",
+    "ts": 1792859807.494752,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed model 'demo-ollama'",
+    "meta": {
+      "id": "demo-ollama",
+      "deleted_files": false
+    }
+  },
+  {
+    "id": "e0babbdd5fac",
+    "ts": 1792859816.5087645,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'support-chats' (2 samples)",
+    "meta": {
+      "id": "support-chats"
+    }
+  },
+  {
+    "id": "da6b59b82835",
+    "ts": 1792859816.5157914,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'builtin-code-algorithms' (600 samples)",
+    "meta": {
+      "id": "builtin-code-algorithms"
+    }
+  },
+  {
+    "id": "e194c08c1ecd",
+    "ts": 1792859816.5223057,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed dataset 'support-chats'",
+    "meta": {
+      "id": "support-chats"
+    }
+  },
+  {
+    "id": "865686fdc7fd",
+    "ts": 1792859816.5311642,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'mixed-folder' from path",
+    "meta": {
+      "id": "mixed-folder",
+      "origin": "C:\\Users\\CSE-TECH-04\\AppData\\Local\\Temp\\pytest-of-CSE-TECH-04\\pytest-14\\test_include_from_path_folder0\\incoming"
+    }
+  },
+  {
+    "id": "d1d326bd4ae1",
+    "ts": 1792859816.538063,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'builtin-code-algorithms' (600 samples)",
+    "meta": {
+      "id": "builtin-code-algorithms"
+    }
+  },
+  {
+    "id": "33ca6ba4cc52",
+    "ts": 1792859816.5455852,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Registered model 'demo-ollama' (ollama)",
+    "meta": {
+      "id": "demo-ollama"
+    }
+  },
+  {
+    "id": "ecde700b9edf",
+    "ts": 1792859816.5485854,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed model 'demo-ollama'",
+    "meta": {
+      "id": "demo-ollama",
+      "deleted_files": false
+    }
   }
 ]

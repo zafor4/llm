@@ -12,9 +12,16 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from torch.utils.data import DataLoader
 
-from src.data.dataset import CausalLMDataset, build_and_split_corpus, generate_synthetic_code_corpus
+from src.data.dataset import CausalLMDataset, build_and_split_corpus
 from src.data.tokenizer import BPETokenizerWrapper
 from src.hub.activity import log_event
+from src.hub.datasets import (
+    BUILTIN_CODE_ID,
+    ensure_builtin_datasets,
+    get_dataset,
+    load_dataset_texts,
+    mark_dataset_used,
+)
 from src.hub.paths import CHECKPOINTS_DIR, DEFAULT_TOKENIZER, JOBS_PATH, ensure_hub_dirs
 from src.hub.registry import sync_registry
 from src.hub.resources import get_device
@@ -31,6 +38,8 @@ TRAIN_STATE: Dict[str, Any] = {
     "model_name": "",
     "mode": "scratch",
     "base_model": "",
+    "dataset_id": "",
+    "dataset_name": "",
     "current_step": 0,
     "total_steps": 0,
     "current_loss": 0.0,
@@ -58,6 +67,7 @@ class TrainStartRequest(BaseModel):
     learning_rate: float = 0.0005
     batch_size: int = 16
     max_steps: int = 100
+    dataset_id: Optional[str] = None
     corpus_text: Optional[str] = ""
 
 
@@ -120,6 +130,8 @@ def _training_worker(req: TrainStartRequest, job_id: str):
             "model_name": req.model_name,
             "mode": req.mode,
             "base_model": req.base_model or "",
+            "dataset_id": req.dataset_id or "",
+            "dataset_name": "",
             "total_steps": req.max_steps,
             "current_step": 0,
             "history": [],
@@ -129,10 +141,27 @@ def _training_worker(req: TrainStartRequest, job_id: str):
     log_event("training", f"Started {req.mode} job for '{req.model_name}'", meta={"job_id": job_id})
 
     try:
-        if req.corpus_text and len(req.corpus_text.strip()) > 80:
-            corpus = [s.strip() for s in req.corpus_text.split("\n\n") if len(s.strip()) > 10]
+        ensure_builtin_datasets()
+        dataset_id = (req.dataset_id or "").strip()
+        if dataset_id:
+            ds = get_dataset(dataset_id)
+            if ds is None:
+                raise RuntimeError(f"Dataset '{dataset_id}' is not in the library.")
+            corpus = load_dataset_texts(dataset_id)
+            TRAIN_STATE["dataset_name"] = ds.get("name") or dataset_id
+        elif req.corpus_text and len(req.corpus_text.strip()) > 10:
+            corpus = [s.strip() for s in req.corpus_text.split("\n\n") if len(s.strip()) > 2]
+            TRAIN_STATE["dataset_name"] = "pasted-one-off"
         else:
-            corpus = generate_synthetic_code_corpus(num_samples=600, seed=42)
+            dataset_id = BUILTIN_CODE_ID
+            TRAIN_STATE["dataset_id"] = dataset_id
+            corpus = load_dataset_texts(dataset_id)
+            ds = get_dataset(dataset_id)
+            TRAIN_STATE["dataset_name"] = (ds or {}).get("name") or dataset_id
+        if len(corpus) < 1:
+            raise RuntimeError("The selected dataset has no training samples.")
+        if dataset_id:
+            mark_dataset_used(dataset_id, req.model_name)
 
         train_texts, val_texts, _ = build_and_split_corpus(corpus)
         if DEFAULT_TOKENIZER.exists():
@@ -199,6 +228,9 @@ def _training_worker(req: TrainStartRequest, job_id: str):
                 "model_name": req.model_name,
                 "mode": req.mode,
                 "base_model": req.base_model,
+                "dataset_id": TRAIN_STATE.get("dataset_id") or dataset_id,
+                "dataset_name": TRAIN_STATE.get("dataset_name"),
+                "sample_count": len(corpus),
                 "status": TRAIN_STATE["status"],
                 "best_val_loss": summary.get("best_val_loss"),
                 "steps": summary.get("final_step"),

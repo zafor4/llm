@@ -11,9 +11,12 @@ REGISTRY_PATH = RESULTS_DIR / "hub_registry.json"
 ACTIVITY_PATH = RESULTS_DIR / "hub_activity.json"
 JOBS_PATH = RESULTS_DIR / "training_jobs.json"
 KEYS_PATH = RESULTS_DIR / "api_keys.json"
+DATASETS_DIR = RESULTS_DIR / "datasets"
+DATASETS_REGISTRY_PATH = RESULTS_DIR / "hub_datasets.json"
 DEFAULT_TOKENIZER = RESULTS_DIR / "bpe_500.json"
 
 
 def ensure_hub_dirs() -> None:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     CHECKPOINTS_DIR.mkdir(parents=True, exist_ok=True)
+    DATASETS_DIR.mkdir(parents=True, exist_ok=True)

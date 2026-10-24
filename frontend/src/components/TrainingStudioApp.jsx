@@ -6,7 +6,7 @@ const PRESETS = [
   { id: 'longer', label: 'Longer', steps: 250, hint: 'More time, usually better fit.' },
 ];
 
-export default function TrainingStudioApp({ onModelTrained, modelsList, continueTarget }) {
+export default function TrainingStudioApp({ onModelTrained, modelsList, continueTarget, datasetTarget, onNeedDataset }) {
   const localModels = (modelsList || []).filter((m) => m.provider === 'local');
   const [mode, setMode] = useState(continueTarget ? 'continue' : 'scratch');
   const [modelName, setModelName] = useState(continueTarget ? `${continueTarget}-v2` : 'My-First-Model');
@@ -19,7 +19,8 @@ export default function TrainingStudioApp({ onModelTrained, modelsList, continue
   const [blockSize, setBlockSize] = useState(128);
   const [lr, setLr] = useState(0.0005);
   const [maxSteps, setMaxSteps] = useState(100);
-  const [corpusText, setCorpusText] = useState('');
+  const [datasets, setDatasets] = useState([]);
+  const [datasetId, setDatasetId] = useState(datasetTarget || '');
   const [trainingStatus, setTrainingStatus] = useState(null);
   const [isTraining, setIsTraining] = useState(false);
   const [jobs, setJobs] = useState([]);
@@ -31,6 +32,21 @@ export default function TrainingStudioApp({ onModelTrained, modelsList, continue
       setModelName(`${continueTarget}-v2`);
     }
   }, [continueTarget]);
+
+  useEffect(() => {
+    fetch('/api/datasets')
+      .then((r) => r.json())
+      .then((d) => {
+        const rows = d.datasets || [];
+        setDatasets(rows);
+        setDatasetId((current) => current || datasetTarget || rows[0]?.id || '');
+      })
+      .catch(() => {});
+  }, [datasetTarget]);
+
+  useEffect(() => {
+    if (datasetTarget) setDatasetId(datasetTarget);
+  }, [datasetTarget]);
 
   useEffect(() => {
     fetch('/api/trainer/jobs').then((r) => r.json()).then((d) => setJobs(d.jobs || [])).catch(() => {});
@@ -74,7 +90,7 @@ export default function TrainingStudioApp({ onModelTrained, modelsList, continue
           learning_rate: lr,
           batch_size: 16,
           max_steps: maxSteps,
-          corpus_text: corpusText,
+          dataset_id: datasetId || null,
         }),
       });
       const data = await res.json();
@@ -127,14 +143,20 @@ export default function TrainingStudioApp({ onModelTrained, modelsList, continue
           ))}
         </div>
 
-        <label className="field-label">Your own text (optional)</label>
-        <textarea
-          className="form-textarea"
-          rows={4}
-          placeholder="Leave blank to use the built-in coding examples."
-          value={corpusText}
-          onChange={(e) => setCorpusText(e.target.value)}
-        />
+        <label className="field-label">Dataset</label>
+        <select className="form-select" value={datasetId} onChange={(e) => setDatasetId(e.target.value)}>
+          {datasets.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name} · {d.sample_count} samples
+            </option>
+          ))}
+        </select>
+        <p className="hint" style={{ marginTop: 6 }}>
+          Local models train on whatever you pick here. Include more data from Datasets first.
+        </p>
+        <button className="btn btn-secondary" style={{ marginTop: 8 }} type="button" onClick={() => onNeedDataset?.()}>
+          Include another dataset
+        </button>
 
         <button className="btn btn-secondary" style={{ marginTop: 12 }} onClick={() => setShowAdvanced(!showAdvanced)}>
           {showAdvanced ? 'Hide extra settings' : 'Show extra settings'}
@@ -179,7 +201,10 @@ export default function TrainingStudioApp({ onModelTrained, modelsList, continue
           {jobs.length === 0 && <p className="hint">Nothing trained yet.</p>}
           {jobs.map((j) => (
             <div key={j.job_id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-              <span>{j.model_name}</span>
+              <span>
+                {j.model_name}
+                {j.dataset_name ? <span className="hint"> · {j.dataset_name}</span> : null}
+              </span>
               <span className="hint">{j.status === 'COMPLETED' ? 'Done' : j.status}</span>
             </div>
           ))}

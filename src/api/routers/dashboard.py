@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from src.hub.activity import list_events
+from src.hub.datasets import list_datasets
 from src.hub.registry import list_models
 from src.hub.resources import get_resource_snapshot
 from src.hub.runtime import active_model_id, loaded_models
@@ -21,6 +22,7 @@ def get_system_vitals():
         {
             "checkpoints_count": sum(1 for m in models if m.get("provider") == "local"),
             "registered_models": len(models),
+            "datasets_count": len(list_datasets()),
             "loaded_count": len(loaded_models()),
             "active_checkpoint": active_model_id(),
             "active_model": active_model_id(),
@@ -37,6 +39,7 @@ def get_hub_overview():
         "loaded_models": loaded_models(),
         "active_model": active_model_id(),
         "catalog": list_models(),
+        "datasets": list_datasets(),
         "training": TRAIN_STATE,
         "recent_jobs": job_history()[:8],
         "activity": list_events(limit=20),

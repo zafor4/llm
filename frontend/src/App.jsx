@@ -8,6 +8,7 @@ import ModelsFleetApp from './components/ModelsFleetApp';
 import BenchmarksApp from './components/BenchmarksApp';
 import ApiGatewayApp from './components/ApiGatewayApp';
 import ResourcesApp from './components/ResourcesApp';
+import DatasetsApp from './components/DatasetsApp';
 import './App.css';
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
   const [modelsList, setModelsList] = useState([]);
   const [loadedModels, setLoadedModels] = useState([]);
   const [continueTarget, setContinueTarget] = useState(null);
+  const [trainDatasetId, setTrainDatasetId] = useState(null);
 
   const fetchVitals = useCallback(async () => {
     try {
@@ -60,6 +62,7 @@ export default function App() {
     dashboard: ['Home', 'Start here. Train, add, or try a model.'],
     models: ['Models', 'Everything you own, plus what is in memory.'],
     resources: ['Resources', 'See this computer, include models, and free memory.'],
+    datasets: ['Datasets', 'Include training data, then attach it to any local model.'],
     training: ['Train', 'Create a new model or improve one you already have.'],
     chat: ['Chat', 'A quick way to talk to the model you are using.'],
     agent: ['Tasks', 'Watch an agent work through a practice job.'],
@@ -114,7 +117,17 @@ export default function App() {
             <TrainingStudioApp
               modelsList={modelsList}
               continueTarget={continueTarget}
+              datasetTarget={trainDatasetId}
+              onNeedDataset={() => setActiveApp('datasets')}
               onModelTrained={refreshHub}
+            />
+          )}
+          {activeApp === 'datasets' && (
+            <DatasetsApp
+              onUseForTraining={(id) => {
+                setTrainDatasetId(id);
+                setActiveApp('training');
+              }}
             />
           )}
           {activeApp === 'models' && (

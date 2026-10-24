@@ -9,12 +9,14 @@ import {
   Share2,
   HeartPulse,
   Sparkles,
+  Library,
 } from 'lucide-react';
 
 export default function Sidebar({ activeApp, setActiveApp, activeModel, vitals }) {
   const main = [
     { id: 'dashboard', label: 'Home', sub: 'What to do next', icon: Home },
     { id: 'models', label: 'Models', sub: 'Your library', icon: Boxes },
+    { id: 'datasets', label: 'Datasets', sub: 'Training data', icon: Library },
     { id: 'resources', label: 'Resources', sub: 'Memory and GPU', icon: Gauge },
     { id: 'training', label: 'Train', sub: 'Create or improve', icon: PlusCircle },
   ];

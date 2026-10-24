@@ -27,7 +27,7 @@
       "relative_path": "results/checkpoints/Custom-GPT-Micro",
       "weight_file": "best_model.pt",
       "updated_at": 1792839096.6010404,
-      "created_at": 1792858388.3044815
+      "created_at": 1792858440.3372192
     },
     "GPT-Micro-128": {
       "id": "GPT-Micro-128",
@@ -56,7 +56,7 @@
       "relative_path": "results/checkpoints/GPT-Micro-128",
       "weight_file": "best_model.pt",
       "updated_at": 1792325505.819839,
-      "created_at": 1792858388.3044815
+      "created_at": 1792858440.3372192
     },
     "GPT-Mini-256": {
       "id": "GPT-Mini-256",
@@ -85,7 +85,7 @@
       "relative_path": "results/checkpoints/GPT-Mini-256",
       "weight_file": "best_model.pt",
       "updated_at": 1792325518.3475773,
-      "created_at": 1792858388.3044815
+      "created_at": 1792858440.3372192
     },
     "GPT-Mini-512": {
       "id": "GPT-Mini-512",
@@ -114,7 +114,7 @@
       "relative_path": "results/checkpoints/GPT-Mini-512",
       "weight_file": "best_model.pt",
       "updated_at": 1792325564.738496,
-      "created_at": 1792858388.3044815
+      "created_at": 1792858440.3372192
     },
     "GPT-Small-256": {
       "id": "GPT-Small-256",
@@ -143,8 +143,37 @@
       "relative_path": "results/checkpoints/GPT-Small-256",
       "weight_file": "best_model.pt",
       "updated_at": 1792325540.4459407,
-      "created_at": 1792858388.3044815
+      "created_at": 1792858440.3372192
+    },
+    "My-First-Model": {
+      "id": "My-First-Model",
+      "name": "My-First-Model",
+      "provider": "local",
+      "kind": "smallgpt",
+      "status": "ready",
+      "capabilities": [
+        "chat",
+        "complete",
+        "finetune"
+      ],
+      "device_hint": "local-weights",
+      "origin": "My-First-Model",
+      "notes": "",
+      "tags": [
+        "local",
+        "smallgpt"
+      ],
+      "metrics": {
+        "val_perplexity": 14.376973111306267,
+        "last_step": 100,
+        "file_size_mb": 7.27
+      },
+      "path": "C:\\Users\\CSE-TECH-04\\Desktop\\zafor\\projects\\llm\\results\\checkpoints\\My-First-Model",
+      "relative_path": "results/checkpoints/My-First-Model",
+      "weight_file": "best_model.pt",
+      "updated_at": 1792858662.8181038,
+      "created_at": 1792858662.8231053
     }
   },
-  "updated_at": 1792858388.7126417
+  "updated_at": 1792859770.9303005
 }

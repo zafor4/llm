@@ -1,0 +1,12 @@
+[
+  {
+    "job_id": "job-1792858658",
+    "model_name": "My-First-Model",
+    "mode": "scratch",
+    "base_model": null,
+    "status": "COMPLETED",
+    "best_val_loss": 2.6656278371810913,
+    "steps": 100,
+    "finished_at": 1792858662.8231053
+  }
+]

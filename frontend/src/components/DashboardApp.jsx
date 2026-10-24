@@ -1,9 +1,10 @@
 import React from 'react';
-import { MessageSquare, PlusCircle, ListChecks, Boxes, Gauge } from 'lucide-react';
+import { MessageSquare, PlusCircle, ListChecks, Boxes, Gauge, Library } from 'lucide-react';
 
 export default function DashboardApp({ vitals, setActiveApp, activeModel, modelsList, loadedModels }) {
   const actions = [
     { id: 'chat', title: 'Chat', desc: 'Ask the model you are using a question.', icon: MessageSquare },
+    { id: 'datasets', title: 'Include a dataset', desc: 'Add your own files or text, then train a model on them.', icon: Library },
     { id: 'training', title: 'Train a model', desc: 'Create a new one, or improve one you already have.', icon: PlusCircle },
     { id: 'agent', title: 'Run a practice task', desc: 'See an agent fix a bug or complete a small job.', icon: ListChecks },
     { id: 'models', title: 'Add or switch models', desc: 'Bring in Hugging Face, Ollama, or a local checkpoint.', icon: Boxes },
@@ -61,6 +62,10 @@ export default function DashboardApp({ vitals, setActiveApp, activeModel, models
         <div className="card-panel">
           <div className="hint">Ready in memory</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 700 }}>{(loadedModels || []).length}</div>
+        </div>
+        <div className="card-panel">
+          <div className="hint">Datasets you have</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 700 }}>{vitals.datasets_count ?? 0}</div>
         </div>
         <div className="card-panel">
           <div className="hint">Computer</div>
