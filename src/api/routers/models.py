@@ -58,6 +58,8 @@ def load_checkpoint(model_name: str) -> bool:
 load_checkpoint(ACTIVE_MODEL_NAME)
 
 
+@router.get("")
+@router.get("/")
 @router.get("/list")
 def list_models():
     """List all available local checkpoints and providers."""
@@ -108,8 +110,11 @@ def list_models():
     })
 
     return {
+        "status": "success",
         "active_model": ACTIVE_MODEL_NAME,
+        "current_model": ACTIVE_MODEL_NAME,
         "models": models,
+        "available_models": models,
     }
 
 

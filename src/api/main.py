@@ -13,12 +13,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from src.api.routers import agent, benchmarks, chat, dashboard, models, tests, trainer
+from src.api.routers import agent, benchmarks, chat, dashboard, gateway, models, tests, trainer
 
 app = FastAPI(
-    title="Antigravity AI Platform API",
-    description="Production-grade asynchronous API for Causal Language Modeling, Autonomous Coding Agents, and Model Training.",
-    version="2.0.0",
+    title="House of Intelligence API Platform",
+    description="Unified operating platform for Model Training, Fleet Management, OpenAI-compatible External API Gateway, and Product Playgrounds.",
+    version="2.1.0",
 )
 
 # CORS Middleware
@@ -38,6 +38,7 @@ app.include_router(agent.router)
 app.include_router(trainer.router)
 app.include_router(benchmarks.router)
 app.include_router(tests.router)
+app.include_router(gateway.router)
 
 # Mount static results directory for images and charts
 results_dir = PROJECT_ROOT / "results"

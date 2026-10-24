@@ -11,13 +11,14 @@ export default function ModelsFleetApp({ activeModel, onSelectModel }) {
   const fetchModels = async () => {
     setRefreshing(true);
     try {
-      const res = await fetch('/api/models/');
+      const res = await fetch('/api/models/list');
       if (res.ok) {
         const data = await res.json();
-        setModels(data.available_models || []);
-        if (data.current_model) {
-          setCurrentLoaded(data.current_model);
-          if (onSelectModel) onSelectModel(data.current_model);
+        setModels(data.models || data.available_models || []);
+        const activeName = data.active_model || data.current_model;
+        if (activeName) {
+          setCurrentLoaded(activeName);
+          if (onSelectModel) onSelectModel(activeName);
         }
       }
     } catch (err) {

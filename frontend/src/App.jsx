@@ -6,6 +6,7 @@ import CodingAgentApp from './components/CodingAgentApp';
 import TrainingStudioApp from './components/TrainingStudioApp';
 import ModelsFleetApp from './components/ModelsFleetApp';
 import BenchmarksApp from './components/BenchmarksApp';
+import ApiGatewayApp from './components/ApiGatewayApp';
 import { Sparkles, Terminal, Activity, Layers } from 'lucide-react';
 import './App.css';
 
@@ -43,14 +44,16 @@ export default function App() {
 
   const fetchModels = async () => {
     try {
-      const res = await fetch('/api/models/');
+      const res = await fetch('/api/models/list');
       if (res.ok) {
         const data = await res.json();
-        if (data.available_models) {
-          setModelsList(data.available_models.map(m => m.name));
+        const list = data.models || data.available_models || [];
+        if (list.length > 0) {
+          setModelsList(list.map(m => m.name || m.id));
         }
-        if (data.current_model) {
-          setActiveModel(data.current_model);
+        const act = data.active_model || data.current_model;
+        if (act) {
+          setActiveModel(act);
         }
       }
     } catch (err) {
@@ -71,7 +74,8 @@ export default function App() {
       case 'chat': return 'Conversational Chatbot Studio';
       case 'agent': return 'Autonomous Coding Agent';
       case 'training': return 'Model Training Studio';
-      case 'models': return 'Models Fleet Manager';
+      case 'models': return 'Models & Providers Fleet';
+      case 'gateway': return 'External API Gateway (House of Intelligence)';
       case 'benchmarks': return 'Benchmarks & System Diagnostics';
       default: return 'Antigravity AI Platform';
     }
@@ -149,6 +153,10 @@ export default function App() {
                 fetchVitals();
               }} 
             />
+          )}
+
+          {activeApp === 'gateway' && (
+            <ApiGatewayApp activeModel={activeModel} />
           )}
 
           {activeApp === 'benchmarks' && (
