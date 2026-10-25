@@ -454,5 +454,526 @@
       "id": "demo-ollama",
       "deleted_files": false
     }
+  },
+  {
+    "id": "9cacf91b9190",
+    "ts": 1792905298.989059,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'builtin-code-algorithms' (600 samples)",
+    "meta": {
+      "id": "builtin-code-algorithms"
+    }
+  },
+  {
+    "id": "6f971b200f5f",
+    "ts": 1792905299.5718546,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "92eeb8e4050c",
+    "ts": 1792905299.5734189,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "73cbec1de869",
+    "ts": 1792905299.5749927,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "c04556b85208",
+    "ts": 1792906279.9841354,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "b9097faf122a",
+    "ts": 1792906279.9851413,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "e475ad8ac4d9",
+    "ts": 1792906279.9867058,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "f7e5b93871fc",
+    "ts": 1792906283.426215,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "51a2a5124bc4",
+    "ts": 1792906283.4272192,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "8319f7cbad91",
+    "ts": 1792906283.4297252,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "fc7666656dfd",
+    "ts": 1792907361.9519322,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "919d38d67c6d",
+    "ts": 1792907361.9535058,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "963718f1adb1",
+    "ts": 1792907361.9550717,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "8a4b61ff9f7e",
+    "ts": 1792907365.3883212,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "7abf9b8748c6",
+    "ts": 1792907365.3899014,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "184248ac9241",
+    "ts": 1792907365.3915055,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "e7270dd4ea5b",
+    "ts": 1792907665.581547,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "aa2eacaab5e2",
+    "ts": 1792907665.5835497,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "4dd4ac4a98a0",
+    "ts": 1792907665.585057,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "ad2f645ec3fc",
+    "ts": 1792907668.8411074,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "d7df2ce42368",
+    "ts": 1792907668.8431087,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "738cdd2d4800",
+    "ts": 1792907668.8441076,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "18f7e088f59f",
+    "ts": 1792907969.3178687,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "141ed81dd019",
+    "ts": 1792907969.3193705,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "bf072d0d4a71",
+    "ts": 1792907969.3213732,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "8f881e0f0d7f",
+    "ts": 1792908069.8262088,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'support-chats' (2 samples)",
+    "meta": {
+      "id": "support-chats"
+    }
+  },
+  {
+    "id": "4c6d57bbb0ba",
+    "ts": 1792908069.8340907,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'builtin-code-algorithms' (600 samples)",
+    "meta": {
+      "id": "builtin-code-algorithms"
+    }
+  },
+  {
+    "id": "8d7b31b64130",
+    "ts": 1792908069.841131,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed dataset 'support-chats'",
+    "meta": {
+      "id": "support-chats"
+    }
+  },
+  {
+    "id": "a0fc3649c4ee",
+    "ts": 1792908069.85081,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'mixed-folder' from path",
+    "meta": {
+      "id": "mixed-folder",
+      "origin": "C:\\Users\\CSE-TECH-04\\AppData\\Local\\Temp\\pytest-of-CSE-TECH-04\\pytest-15\\test_include_from_path_folder0\\incoming"
+    }
+  },
+  {
+    "id": "b258fb45b45d",
+    "ts": 1792908069.8580165,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'builtin-code-algorithms' (600 samples)",
+    "meta": {
+      "id": "builtin-code-algorithms"
+    }
+  },
+  {
+    "id": "7ad49632bb91",
+    "ts": 1792908069.8658786,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Registered model 'demo-ollama' (ollama)",
+    "meta": {
+      "id": "demo-ollama"
+    }
+  },
+  {
+    "id": "480635e99199",
+    "ts": 1792908069.8695188,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed model 'demo-ollama'",
+    "meta": {
+      "id": "demo-ollama",
+      "deleted_files": false
+    }
+  },
+  {
+    "id": "cdee99782daa",
+    "ts": 1792908569.9141624,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "a65666d79434",
+    "ts": 1792908569.9151976,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "11ad7e6d4df4",
+    "ts": 1792908569.917273,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "b7576d31f120",
+    "ts": 1792908572.8679626,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "14ebf952bec1",
+    "ts": 1792908572.8700402,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "6d9eb8ce52cb",
+    "ts": 1792908572.871605,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "90e0ce998b5f",
+    "ts": 1792908981.3516202,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Activated 'GPT-Mini-256'",
+    "meta": {
+      "id": "GPT-Mini-256"
+    }
+  },
+  {
+    "id": "f63663f591c6",
+    "ts": 1792908981.3532057,
+    "kind": "runtime",
+    "level": "info",
+    "source": "hub",
+    "message": "Loaded 'GPT-Mini-256' (local)",
+    "meta": {
+      "id": "GPT-Mini-256",
+      "provider": "local"
+    }
+  },
+  {
+    "id": "88c4d2d2fc97",
+    "ts": 1792908981.3552895,
+    "kind": "hub",
+    "level": "info",
+    "source": "hub",
+    "message": "Control plane online. Active model: GPT-Mini-256",
+    "meta": {}
+  },
+  {
+    "id": "58a63ea13d16",
+    "ts": 1792909017.8130867,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'support-chats' (2 samples)",
+    "meta": {
+      "id": "support-chats"
+    }
+  },
+  {
+    "id": "9a0a6f08429c",
+    "ts": 1792909017.8211286,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'builtin-code-algorithms' (600 samples)",
+    "meta": {
+      "id": "builtin-code-algorithms"
+    }
+  },
+  {
+    "id": "24679f23f4c6",
+    "ts": 1792909017.8281362,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed dataset 'support-chats'",
+    "meta": {
+      "id": "support-chats"
+    }
+  },
+  {
+    "id": "19856009b886",
+    "ts": 1792909017.8373039,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'mixed-folder' from path",
+    "meta": {
+      "id": "mixed-folder",
+      "origin": "C:\\Users\\CSE-TECH-04\\AppData\\Local\\Temp\\pytest-of-CSE-TECH-04\\pytest-16\\test_include_from_path_folder0\\incoming"
+    }
+  },
+  {
+    "id": "d006773eed28",
+    "ts": 1792909017.8436115,
+    "kind": "dataset",
+    "level": "info",
+    "source": "hub",
+    "message": "Included dataset 'builtin-code-algorithms' (600 samples)",
+    "meta": {
+      "id": "builtin-code-algorithms"
+    }
+  },
+  {
+    "id": "3256c35083f2",
+    "ts": 1792909017.8517964,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Registered model 'demo-ollama' (ollama)",
+    "meta": {
+      "id": "demo-ollama"
+    }
+  },
+  {
+    "id": "6f7a02bcc835",
+    "ts": 1792909017.8554637,
+    "kind": "registry",
+    "level": "info",
+    "source": "hub",
+    "message": "Removed model 'demo-ollama'",
+    "meta": {
+      "id": "demo-ollama",
+      "deleted_files": false
+    }
   }
 ]

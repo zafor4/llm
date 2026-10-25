@@ -1,0 +1,37 @@
+{
+  "datasets": {
+    "builtin-code-algorithms": {
+      "id": "builtin-code-algorithms",
+      "name": "Built-in code algorithms",
+      "source": "builtin",
+      "sector": "code",
+      "format": "text",
+      "schema": "code",
+      "status": "ready",
+      "sample_count": 600,
+      "char_count": 274747,
+      "file_size_mb": 0.281,
+      "path": "C:\\Users\\CSE-TECH-04\\Desktop\\zafor\\projects\\llm\\results\\datasets\\builtin-code-algorithms",
+      "relative_path": "results/datasets/builtin-code-algorithms",
+      "samples_file": "samples.jsonl",
+      "origin": "builtin",
+      "original_name": "builtin-code-algorithms",
+      "source_files": [],
+      "notes": "Shipped with the hub. Use this or include your own data instead.",
+      "tags": [
+        "builtin",
+        "code"
+      ],
+      "preview": [
+        "class Stack: \"\"\"LIFO Stack data structure implemented via Python list.\"\"\" def __init__(self): self._items = [] def push(self, item) -> None: self._items.append(item) def pop(self): if self.is_empty(): raise IndexError(\"pop from empty stack\u2026",
+        "def merge_sort(arr: list[int]) -> list[int]: \"\"\"Sort a list using merge sort algorithm. Time Complexity: O(n log n), Space Complexity: O(n). \"\"\" if len(arr) <= 1: return arr mid = len(arr) // 2 left = merge_sort(arr[:mid]) right = merge_so\u2026",
+        "# Algorithmic Example #2 class Queue: \"\"\"FIFO Queue data structure implemented via collections.deque.\"\"\" from collections import deque def __init__(self): from collections import deque self._items = deque() def enqueue(self, item) -> None:\u2026"
+      ],
+      "warnings": [],
+      "used_by": [],
+      "created_at": 1792905298.987053,
+      "updated_at": 1792905298.987053
+    }
+  },
+  "updated_at": 1792905298.987053
+}
