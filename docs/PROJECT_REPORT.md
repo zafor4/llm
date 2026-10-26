@@ -53,7 +53,7 @@ The domain chosen for this causal language modeling task is structured Python al
 - **Linear Data Structures:** Complete Python class implementations of FIFO Queues, LIFO Stacks, and Binary Search Trees.
 - **Mathematical Utilities:** Greatest Common Divisor (Euclidean algorithm), Least Common Multiple, and primality testing.
 
-Each algorithmic implementation includes strict PEP 484 type annotations, formal docstrings detailing asymptotic time and space complexities ($O(n \log n)$, $O(V + E)$), and explicit edge-case handling (empty inputs, zero denominators, boundary conditions).
+Each algorithmic implementation includes strict PEP 484 type annotations, formal docstrings detailing asymptotic time and space complexities ($O(n \log n)$, $O(V + E)$), and explicit edge-case handling (empty inputs, zero denominators, boundary conditions). A dedicated reference of in-repo dataset files and external benchmark links is documented in [`DATASET_LINKS.md`](file:///c:/Users/CSE-TECH-04/Desktop/zafor/projects/llm/docs/DATASET_LINKS.md).
 
 ### 2.2 Dataset Statistics and Partitioning
 The generated dataset contains 23,428 characters of algorithmic text. For causal modeling, the text is tokenized and sliced into contiguous input-target training pairs. The dataset was partitioned using an 80% training, 10% validation, and 10% held-out test split, stratified deterministically to guarantee that all splits share consistent structural representations.
